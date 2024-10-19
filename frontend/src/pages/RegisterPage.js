@@ -27,8 +27,10 @@ const RegisterPage = () => {
   // CSRF Token handling using Axios Interceptor
   useEffect(() => {
     axios.interceptors.request.use((config) => {
-      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-      config.headers['X-CSRF-Token'] = csrfToken;
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken;
+      }
       return config;
     }, (error) => {
       return Promise.reject(error);
@@ -49,14 +51,6 @@ const RegisterPage = () => {
     }
   };
 
-  // Validate password strength
-  const suggestStrongPassword = (score) => {
-    if (score < 3) {
-      return 'Your password is too weak. Try including more characters, symbols, and numbers.';
-    }
-    return '';
-  };
-
   // Validate email format
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,32 +62,40 @@ const RegisterPage = () => {
     setCaptchaVerified(true); // In a real app, send the value to backend for verification
   };
 
-  // Check username availability
+  // Check username availability with throttling
+  let usernameTimeout;
   const checkUsernameAvailability = async (username) => {
-    try {
-      const response = await axios.get(`/auth/check-username?username=${username}`);
-      if (!response.data.available) {
-        setErrors((prevErrors) => ({ ...prevErrors, username: 'Username is already taken' }));
-      } else {
-        setErrors((prevErrors) => ({ ...prevErrors, username: '' }));
+    if (usernameTimeout) clearTimeout(usernameTimeout);
+    usernameTimeout = setTimeout(async () => {
+      try {
+        const response = await axios.get(`/auth/check-username?username=${username}`);
+        if (!response.data.available) {
+          setErrors((prevErrors) => ({ ...prevErrors, username: 'Username is already taken' }));
+        } else {
+          setErrors((prevErrors) => ({ ...prevErrors, username: '' }));
+        }
+      } catch (error) {
+        setErrors((prevErrors) => ({ ...prevErrors, username: 'Error checking username availability' }));
       }
-    } catch (error) {
-      setErrors((prevErrors) => ({ ...prevErrors, username: 'Error checking username availability' }));
-    }
+    }, 500);
   };
 
-  // Check email availability
+  // Check email availability with throttling
+  let emailTimeout;
   const checkEmailAvailability = async (email) => {
-    try {
-      const response = await axios.get(`/auth/check-email?email=${email}`);
-      if (!response.data.available) {
-        setErrors((prevErrors) => ({ ...prevErrors, email: 'Email is already in use' }));
-      } else {
-        setErrors((prevErrors) => ({ ...prevErrors, email: '' }));
+    if (emailTimeout) clearTimeout(emailTimeout);
+    emailTimeout = setTimeout(async () => {
+      try {
+        const response = await axios.get(`/auth/check-email?email=${email}`);
+        if (!response.data.available) {
+          setErrors((prevErrors) => ({ ...prevErrors, email: 'Email is already in use' }));
+        } else {
+          setErrors((prevErrors) => ({ ...prevErrors, email: '' }));
+        }
+      } catch (error) {
+        setErrors((prevErrors) => ({ ...prevErrors, email: 'Error checking email availability' }));
       }
-    } catch (error) {
-      setErrors((prevErrors) => ({ ...prevErrors, email: 'Error checking email availability' }));
-    }
+    }, 500);
   };
 
   // Validate form inputs
@@ -115,7 +117,7 @@ const RegisterPage = () => {
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (passwordStrength < 3) {
-      newErrors.password = suggestStrongPassword(passwordStrength);
+      newErrors.password = 'Password is too weak. Include more characters, symbols, and numbers.';
     }
 
     if (formData.password !== formData.confirmPassword) {
