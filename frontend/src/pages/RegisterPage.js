@@ -10,6 +10,8 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    securityQuestion: '',
+    securityAnswer: '',
     agreeTerms: false,
   });
   const [blockchainAddress, setBlockchainAddress] = useState('');
@@ -19,6 +21,8 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0); // For rate limiting
+  const [enable2FA, setEnable2FA] = useState(false); // For optional 2FA
 
   // CSRF Token handling using Axios Interceptor
   useEffect(() => {
@@ -118,6 +122,10 @@ const RegisterPage = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
+    if (!formData.securityQuestion || !formData.securityAnswer) {
+      newErrors.securityQuestion = 'Security question and answer are required';
+    }
+
     if (!formData.agreeTerms) {
       newErrors.agreeTerms = 'You must agree to the Terms of Service and Privacy Policy';
     }
@@ -136,18 +144,26 @@ const RegisterPage = () => {
     return wallet.address;
   };
 
-  // Handle form submission
+  // Handle form submission with Rate Limiting
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (attemptCount >= 5) {
+      setErrors({ submit: 'Too many attempts, please try again later.' });
+      return;
+    }
+
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
+      setAttemptCount((prev) => prev + 1); // Increment attempt count
       return;
     }
 
     setLoading(true);
     setErrors({});
     setSuccessMessage('');
+    setAttemptCount(0); // Reset attempt count on success
 
     try {
       // Generate blockchain address for the user
@@ -174,6 +190,11 @@ const RegisterPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Toggle 2FA setup (optional after registration)
+  const handle2FASetup = () => {
+    setEnable2FA(!enable2FA);
   };
 
   return (
@@ -240,6 +261,31 @@ const RegisterPage = () => {
           {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
         </div>
 
+        {/* Security Question Field */}
+        <div className="form-group">
+          <label>Security Question</label>
+          <select
+            name="securityQuestion"
+            value={formData.securityQuestion}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select a question</option>
+            <option value="nickname">What was your childhood nickname?</option>
+            <option value="pet">What is the name of your first pet?</option>
+            <option value="mother">What is your mother’s maiden name?</option>
+          </select>
+          <input
+            type="text"
+            name="securityAnswer"
+            placeholder="Your answer"
+            value={formData.securityAnswer}
+            onChange={handleChange}
+            required
+          />
+          {errors.securityQuestion && <p className="error">{errors.securityQuestion}</p>}
+        </div>
+
         {/* CAPTCHA */}
         <div className="form-group">
           <ReCAPTCHA sitekey="your-site-key" onChange={onCaptchaVerify} />
@@ -282,6 +328,14 @@ const RegisterPage = () => {
           </small>
         </div>
       )}
+
+      {/* Optional 2FA Setup */}
+      <div className="form-group">
+        <button onClick={handle2FASetup}>
+          {enable2FA ? 'Disable Two-Factor Authentication (2FA)' : 'Enable Two-Factor Authentication (2FA)'}
+        </button>
+        {enable2FA && <p>2FA enabled. Follow the setup instructions sent to your email.</p>}
+      </div>
     </div>
   );
 };
