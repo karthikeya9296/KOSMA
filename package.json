@@ -38,7 +38,9 @@
         "@story-protocol/contracts": "https://github.com/storyprotocol/protocol-contracts.git",
         "@story-protocol/protocol-core": "https://github.com/storyprotocol/protocol-core-v1.git",
         "bcrypt": "^5.1.0",
+        "browserify-zlib": "^0.2.0",
         "cors": "^2.8.5",
+        "crypto-browserify": "^3.12.0",
         "dotenv": "^16.4.5",
         "ethers": "^5.7.0",
         "express": "^4.18.2",
@@ -48,8 +50,12 @@
         "layerzero": "^1.0.1",
         "mongoose": "^8.7.2",
         "morgan": "^1.10.0",
+        "path-browserify": "^1.0.1",
+        "stream-browserify": "^3.0.0",
+        "stream-http": "^3.2.0",
         "truffle-plugin-verify": "^0.6.3",
         "typescript-sdk": "https://github.com/storyprotocol/sdk.git",
+        "url": "^0.11.4",
         "web3": "^4.13.0"
     },
     "devDependencies": {
