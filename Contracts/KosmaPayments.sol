@@ -1,141 +1,168 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "layerzero/contracts/LayerZeroEndpoint.sol";
+import "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
 
-interface ISuperfluid {
-    function createFlow(address recipient, uint256 flowRate) external;
-    function updateFlow(address recipient, uint256 newFlowRate) external;
-    function deleteFlow(address sender, address recipient) external;
-}
+contract KosmaPayments is Ownable, ReentrancyGuard {
+    using Counters for Counters.Counter;
+    IERC20 public immutable usdcToken; // Circle USDC token
+    ISuperfluid private immutable superfluidHost; // Superfluid host contract
+    IConstantFlowAgreementV1 private immutable cfa; // Superfluid Constant Flow Agreement
+    LayerZeroEndpoint public immutable layerZeroEndpoint; // LayerZero endpoint for cross-chain payments
 
-contract KosmaPayments is Ownable, ReentrancyGuard, AccessControl, Initializable {
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+    Counters.Counter private transactionIdCounter;
 
-    // Token and Superfluid interfaces
-    IERC20 public usdcToken;
-    ISuperfluid public superfluid;
-
-    bytes32 public constant DAO_ROLE = keccak256("DAO_ROLE");
-    bytes32 public constant CREATOR_ROLE = keccak256("CREATOR_ROLE");
-
-    bool public paymentsEnabled;
-    mapping(address => uint256) public userBalances;
-
-    // Events
-    event PaymentDeposited(address indexed user, uint256 amount);
-    event PaymentWithdrawn(address indexed user, uint256 amount);
-    event StreamingPaymentStarted(address indexed creator, address indexed subscriber, uint256 flowRate);
-    event StreamingPaymentUpdated(address indexed creator, address indexed subscriber, uint256 newFlowRate);
-    event StreamingPaymentStopped(address indexed creator, address indexed subscriber);
-
-    // Modifier for rate-limiting to prevent abuse
-    mapping(address => uint256) private lastActionTime;
-    uint256 public actionCooldown = 1 minutes;
-
-    modifier rateLimited() {
-        require(
-            block.timestamp >= lastActionTime[msg.sender] + actionCooldown,
-            "Rate limit exceeded"
-        );
-        _;
-        lastActionTime[msg.sender] = block.timestamp;
+    struct Escrow {
+        address sender;
+        address receiver;
+        uint256 amount;
+        bool isCompleted;
     }
 
-    constructor(address _usdcTokenAddress, address _superfluidAddress) {
-        usdcToken = IERC20(_usdcTokenAddress);
-        superfluid = ISuperfluid(_superfluidAddress);
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    }
+    mapping(uint256 => Escrow) public escrows;
 
-    function initialize() public initializer {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(DAO_ROLE, msg.sender);
-    }
+    event Deposit(address indexed sender, uint256 amount, uint256 transactionId);
+    event Withdrawal(address indexed receiver, uint256 amount, uint256 transactionId);
+    event StreamStarted(address indexed from, address indexed to, int96 flowRate);
+    event StreamStopped(address indexed from, address indexed to);
+    event CrossChainPayment(address indexed sender, address indexed receiver, uint256 amount, string destinationChain);
 
-    // Enable or disable payments
-    function setPaymentsEnabled(bool enabled) external onlyRole(DAO_ROLE) {
-        paymentsEnabled = enabled;
-    }
-
-    // Set cooldown for rate-limiting actions
-    function setActionCooldown(uint256 cooldown) external onlyRole(DAO_ROLE) {
-        actionCooldown = cooldown;
-    }
-
-    // Deposit USDC into the contract
-    function depositPayment(uint256 amount) external nonReentrant rateLimited {
-        require(paymentsEnabled, "Payments are currently disabled");
-        require(amount > 0, "Amount must be greater than zero");
-
-        usdcToken.safeTransferFrom(msg.sender, address(this), amount);
-        userBalances[msg.sender] = userBalances[msg.sender].add(amount);
-        emit PaymentDeposited(msg.sender, amount);
-    }
-
-    // Withdraw deposited USDC
-    function withdrawPayment(uint256 amount) external nonReentrant rateLimited {
-        require(amount > 0, "Amount must be greater than zero");
-        require(userBalances[msg.sender] >= amount, "Insufficient balance");
-
-        userBalances[msg.sender] = userBalances[msg.sender].sub(amount);
-        usdcToken.safeTransfer(msg.sender, amount);
-        emit PaymentWithdrawn(msg.sender, amount);
-    }
-
-    // Start streaming payment using Superfluid
-    function startStreamingPayment(address creator, uint256 flowRate) external onlyRole(CREATOR_ROLE) rateLimited {
-        require(paymentsEnabled, "Payments are currently disabled");
-        require(flowRate > 0, "Flow rate must be greater than zero");
-
-        superfluid.createFlow(creator, flowRate);
-        emit StreamingPaymentStarted(creator, msg.sender, flowRate);
-    }
-
-    // Update an existing streaming payment
-    function updateStreamingPayment(address creator, uint256 newFlowRate) external onlyRole(CREATOR_ROLE) rateLimited {
-        require(newFlowRate > 0, "New flow rate must be greater than zero");
-
-        superfluid.updateFlow(creator, newFlowRate);
-        emit StreamingPaymentUpdated(creator, msg.sender, newFlowRate);
-    }
-
-    // Stop a streaming payment
-    function stopStreamingPayment(address creator) external onlyRole(CREATOR_ROLE) rateLimited {
-        superfluid.deleteFlow(msg.sender, creator);
-        emit StreamingPaymentStopped(creator, msg.sender);
-    }
-
-    // Fallback function to recover mistakenly sent Ether
-    receive() external payable {
-        revert("Contract does not accept Ether");
-    }
-
-    fallback() external payable {
-        revert("Invalid call");
-    }
-
-    // Recover mistakenly sent tokens
-    function recoverTokens(address tokenAddress) external onlyRole(DAO_ROLE) {
-        uint256 balance = IERC20(tokenAddress).balanceOf(address(this));
-        require(balance > 0, "No tokens to recover");
-        IERC20(tokenAddress).safeTransfer(msg.sender, balance);
-    }
-}
-
-contract KosmaPaymentsProxy is TransparentUpgradeableProxy {
     constructor(
-        address _logic,
-        address admin_,
-        bytes memory _data
-    ) TransparentUpgradeableProxy(_logic, admin_, _data) {}
+        address _usdcTokenAddress,
+        address _superfluidHost,
+        address _cfa,
+        address _layerZeroEndpointAddress
+    ) {
+        usdcToken = IERC20(_usdcTokenAddress);
+        superfluidHost = ISuperfluid(_superfluidHost);
+        cfa = IConstantFlowAgreementV1(_cfa);
+        layerZeroEndpoint = LayerZeroEndpoint(_layerZeroEndpointAddress);
+    }
+
+    modifier onlySender(uint256 transactionId) {
+        require(msg.sender == escrows[transactionId].sender, "Not the sender of this transaction");
+        _;
+    }
+
+    modifier onlyReceiver(uint256 transactionId) {
+        require(msg.sender == escrows[transactionId].receiver, "Not the receiver of this transaction");
+        _;
+    }
+
+    // 1. Regular Payments Using Circle USDC
+    function deposit(uint256 amount, address receiver) external nonReentrant {
+        require(usdcToken.transferFrom(msg.sender, address(this), amount), "Deposit failed");
+
+        transactionIdCounter.increment();
+        uint256 transactionId = transactionIdCounter.current();
+
+        escrows[transactionId] = Escrow({
+            sender: msg.sender,
+            receiver: receiver,
+            amount: amount,
+            isCompleted: false
+        });
+
+        emit Deposit(msg.sender, amount, transactionId);
+    }
+
+    function releaseFunds(uint256 transactionId) external onlySender(transactionId) nonReentrant {
+        Escrow storage escrow = escrows[transactionId];
+        require(!escrow.isCompleted, "Transaction already completed");
+
+        escrow.isCompleted = true;
+        require(usdcToken.transfer(escrow.receiver, escrow.amount), "Transfer failed");
+
+        emit Withdrawal(escrow.receiver, escrow.amount, transactionId);
+    }
+
+    // 2. Streaming Payments Using Superfluid
+    function startStream(
+        address receiver,
+        int96 flowRate // Flow rate in amount per second
+    ) external nonReentrant {
+        require(flowRate > 0, "Flow rate must be positive");
+
+        superfluidHost.callAgreement(
+            cfa,
+            abi.encodeWithSelector(
+                cfa.createFlow.selector,
+                usdcToken,
+                receiver,
+                flowRate,
+                new bytes(0)
+            ),
+            "0x"
+        );
+
+        emit StreamStarted(msg.sender, receiver, flowRate);
+    }
+
+    function updateStream(
+        address receiver,
+        int96 newFlowRate
+    ) external nonReentrant {
+        require(newFlowRate > 0, "Flow rate must be positive");
+
+        superfluidHost.callAgreement(
+            cfa,
+            abi.encodeWithSelector(
+                cfa.updateFlow.selector,
+                usdcToken,
+                receiver,
+                newFlowRate,
+                new bytes(0)
+            ),
+            "0x"
+        );
+
+        emit StreamStarted(msg.sender, receiver, newFlowRate);
+    }
+
+    function stopStream(address receiver) external nonReentrant {
+        superfluidHost.callAgreement(
+            cfa,
+            abi.encodeWithSelector(
+                cfa.deleteFlow.selector,
+                usdcToken,
+                msg.sender,
+                receiver,
+                new bytes(0)
+            ),
+            "0x"
+        );
+
+        emit StreamStopped(msg.sender, receiver);
+    }
+
+    // 3. Cross-Chain Payment Protocol
+    function crossChainPayment(
+        address receiver,
+        uint256 amount,
+        string memory destinationChain
+    ) external nonReentrant {
+        require(usdcToken.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+
+        // Use LayerZero to send payment to the receiver on another chain
+        layerZeroEndpoint.send(destinationChain, msg.sender, receiver, amount);
+
+        emit CrossChainPayment(msg.sender, receiver, amount, destinationChain);
+    }
+
+    // 4. Emergency Withdraw
+    function emergencyWithdraw(uint256 transactionId) external onlyOwner nonReentrant {
+        Escrow storage escrow = escrows[transactionId];
+        require(!escrow.isCompleted, "Transaction already completed");
+
+        escrow.isCompleted = true;
+        require(usdcToken.transfer(escrow.sender, escrow.amount), "Refund failed");
+
+        emit Withdrawal(escrow.sender, escrow.amount, transactionId);
+    }
 }

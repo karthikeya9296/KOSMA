@@ -1,92 +1,148 @@
-kosma/
-│
-├── contracts/  # Smart contracts for blockchain interaction, written in Solidity
-│   ├── KosmaNFT.sol               # Manages NFTs related to content licensing and royalty payments
-│   ├── KosmaPayments.sol          # Handles payments using Circle USDC and Superfluid for streaming payments
-│   ├── LayerZeroMessaging.sol     # Manages cross-chain (omnichain) communication using LayerZero V2
-│   ├── SignAttestations.sol       # Manages digital attestations using Sign Protocol
-│   ├── StoryIntegration.sol       # Integrates Story Protocol for licensing, royalties, and disputes of content
-│   ├── FlowNFT.sol                # Manages NFTs on Flow blockchain (using Cadence integration)
-│   └── UnlockMemberships.sol      # Manages memberships using Unlock Protocol
-│
-├── backend/  # Backend server to handle the business logic, APIs, and interact with the blockchain
-│   ├── app.js                    # The main server file, runs the backend (using Node.js/Express)
-│   ├── db/                       # Database configuration files to manage data persistence
-│   │   └── dbConfig.js           # Configuration for connecting to the database, including blockchain address management
-│   ├── routes/                   # Defines different API endpoints for various functionalities
-│   │   ├── authRoutes.js         # Routes for user authentication (login, signup, etc.)
-│   │   ├── contentRoutes.js      # Routes for managing user content (create, update, delete)
-│   │   ├── paymentRoutes.js      # Routes for handling payments (Circle USDC, Superfluid)
-│   │   ├── nftRoutes.js          # Routes for NFT functionalities like minting and licensing on Polygon and Flow
-│   │   ├── storyRoutes.js        # Routes for using Story Protocol (licensing, royalties, and disputes)
-│   │   ├── omnichainRoutes.js    # Routes for handling cross-chain interactions with LayerZero
-│   │   ├── membershipRoutes.js   # Routes for managing memberships using Unlock Protocol
-│   │   ├── attestRoutes.js       # Routes for managing attestations and encryption using Sign Protocol
-│   │   └── registrationRoutes.js # Routes for user registration and blockchain address generation
-│   ├── services/                 # Services that handle business logic, connecting backend to the blockchain
-│   │   ├── blockchainService.js  # Service to interact with blockchain contracts
-│   │   ├── paymentService.js     # Service to manage payments (Circle USDC, Superfluid streaming)
-│   │   ├── nftService.js         # Service for handling NFTs (minting, licensing)
-│   │   ├── storyService.js       # Service for licensing, royalties, and disputes (Story Protocol)
-│   │   ├── membershipService.js  # Service for managing memberships using Unlock Protocol
-│   │   ├── omnichainService.js   # Service for handling cross-chain messaging (LayerZero)
-│   │   ├── attestService.js      # Service for handling attestations and encryption (Sign Protocol)
-│   │   ├── userService.js        # Service for managing user accounts and data
-│   │   └── registrationService.js # Service for user registration and blockchain address generation
-│   ├── middlewares/              # Middleware for security and verification
-│   │   ├── authMiddleware.js     # Middleware for user authentication (JWT or token-based)
-│   │   └── blockchainValidation.js # Middleware to validate blockchain interactions
-│   └── tests/                    # Unit tests for backend routes and services
-│       ├── authRoutes.test.js    # Tests for user authentication routes
-│       ├── paymentService.test.js # Tests for payment services
-│       ├── nftRoutes.test.js     # Tests for NFT routes and services
-│       └── storyService.test.js  # Tests for Story Protocol services
-│
-├── frontend/  # Frontend web application code, written using React.js
-│   ├── public/                    # Public assets like images, icons, etc.
-│   ├── src/                       # Main source code for the frontend
-│   │   ├── components/            # Reusable components for the web application UI
-│   │   │   ├── Navbar.js          # Navigation bar component
-│   │   │   ├── ContentCard.js     # Component to display user content
-│   │   │   ├── MembershipCard.js  # Component for showing membership details (Unlock Protocol)
-│   │   │   ├── PaymentForm.js     # Component for handling payments and tipping
-│   │   │   ├── LedgerConnect.js   # Component to connect with Ledger wallet for security
-│   │   │   ├── AIContentGenerator.js # Component to generate AI content for users
-│   │   │   └── Notification.js    # Component to display notifications to users
-│   │   ├── pages/                 # Different pages of the website
-│   │   │   ├── HomePage.js        # Home page for users
-│   │   │   ├── ContentPage.js     # Page to view individual content details
-│   │   │   ├── ProfilePage.js     # User profile management page, displays unique blockchain ID
-│   │   │   ├── MembershipPage.js  # Page for viewing and purchasing memberships
-│   │   │   ├── RegisterPage.js    # Page for new users to register and create their blockchain address
-│   │   │   └── RoyaltyDashboard.js # Page to manage royalties, licensing, and disputes
-│   │   ├── services/              # Services for calling the backend API from the frontend
-│   │   │   ├── authService.js     # Service to handle user authentication
-│   │   │   ├── contentService.js  # Service to handle content-related operations
-│   │   │   ├── nftService.js      # Service to interact with NFT functionalities (minting/licensing)
-│   │   │   ├── paymentService.js  # Service for payment operations
-│   │   │   ├── membershipService.js # Service to manage memberships
-│   │   │   ├── storyService.js    # Service to interact with Story Protocol via API
-│   │   │   ├── omnichainService.js # Service to handle cross-chain operations
-│   │   │   ├── attestService.js   # Service to interact with attestations API
-│   │   │   └── aiService.js       # Service for AI content generation functionality
-│   │   ├── App.js                 # Main application component
-│   │   ├── index.js               # Entry point for the React application
-│   │   └── styles/                # CSS or SCSS files for styling the frontend components
-│       └── └── app.scss           # Main styling file for the application
-│
-├── scripts/  # Deployment and automation scripts
-│   ├── deployContracts.js  # Script to deploy blockchain smart contracts (Truffle/Hardhat)
-│   ├── createSubgraph.js   # Script to create a subgraph using The Graph (for data querying)
-│   └── deployFrontend.sh   # Script to deploy the frontend to a server or hosting service
-│
-├── docs/  # Documentation related to the project
-│   ├── systemArchitecture.md  # Documentation describing the system architecture
-│   ├── apiDocumentation.md  # Documentation for the API endpoints
-│   └── developmentGuidelines.md  # Development guidelines for contributors
-│
-├── README.md  # Main readme file providing project overview, setup instructions, etc.
-├── .env  # Environment variables file for storing API keys and secret credentials
-├── package.json  # Configuration for Node.js project dependencies
-├── truffle-config.js  # Configuration for Truffle (used for deploying Ethereum smart contracts)
-└── yarn.lock  # Lock file to ensure consistent dependency versions
+# Kosma Decentralized Social Media Platform
+
+Kosma is a decentralized social media platform that aims to provide a secure, non-invasive, privacy-centric alternative to current social networks. By leveraging blockchain technology, Kosma gives users control over their data, content, and monetization options, while ensuring cross-chain compatibility and efficient content licensing.
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Technologies Used](#technologies-used)
+- [Core Features](#core-features)
+- [System Architecture](#system-architecture)
+- [Frontend Modules](#frontend-modules)
+- [Backend Modules](#backend-modules)
+- [Smart Contracts](#smart-contracts)
+- [Deployment](#deployment)
+- [Installation and Setup](#installation-and-setup)
+- [Usage](#usage)
+- [Contribution Guidelines](#contribution-guidelines)
+- [License](#license)
+
+## Project Overview
+
+Kosma aims to disrupt the current social media landscape by prioritizing user privacy, non-addictive content consumption, and transparent monetization. It enables users to securely interact, create content, mint NFTs, license their work, and communicate across different blockchain networks. The platform offers seamless cross-chain interactions and privacy-centric features by integrating multiple blockchain tools and services.
+
+## Technologies Used
+
+- **Solidity**: Smart contract development for NFT minting, payments, attestations, etc.
+- **Flow Blockchain**: Efficient NFT management and cross-chain compatibility.
+- **LayerZero V2**: Cross-chain messaging and NFT interactions.
+- **Story Protocol**: Content licensing, royalty, and dispute management.
+- **Sign Protocol**: Attestations for content ownership, licensing, and user verification.
+- **Superfluid**: Streaming payments for subscriptions and royalty payments.
+- **Circle USDC**: Stablecoin payments.
+- **XMTP**: Secure on-chain messaging for comments and notifications.
+- **Unlock Protocol**: Membership management for premium content.
+- **React.js**: Frontend UI components.
+- **Node.js/Express**: Backend APIs to interact with the blockchain.
+- **MongoDB**: Metadata storage and user management.
+
+## Core Features
+
+- **NFT Minting and Royalty Management**: Users can mint NFTs representing their content and specify royalty percentages.
+- **Content Licensing**: Implemented via Story Protocol, enabling secure and clear licensing agreements.
+- **Membership and Exclusive Content**: Managed through Unlock Protocol, offering multiple membership tiers.
+- **Streaming Payments**: Leveraging Superfluid for continuous payments for licensed content.
+- **Cross-Chain Compatibility**: LayerZero V2 for transferring NFTs and messages across blockchain networks.
+- **Secure Messaging and Encryption**: Using XMTP and Lit Protocol for encrypted notifications and secure messaging.
+- **AI-Powered Content Generation**: AI tools integrated for generating captions, text, and other creative content.
+
+## System Architecture
+
+The platform is divided into the following major components:
+
+- **Smart Contracts**: Written in Solidity, these handle NFT minting, licensing, attestations, royalty distribution, and payments.
+- **Backend Services**: A Node.js/Express server that handles API requests, blockchain interactions, and database management.
+- **Frontend Application**: A React.js application for user interactions, content consumption, and wallet integration.
+- **Database**: MongoDB used for storing metadata about users, content, transactions, and profiles.
+
+For detailed system architecture, refer to the documentation available in the `/docs/systemArchitecture.md` file.
+
+## Frontend Modules
+
+### Components
+
+- **Navbar.js**: Main navigation menu, integrates with LedgerJS for wallet connections.
+- **ContentCard.js**: Displays user-generated content, including options for liking, sharing, and licensing.
+- **MembershipCard.js**: Shows membership details and allows users to purchase memberships via Unlock Protocol.
+- **PaymentForm.js**: Manages all payments, including tips, content purchases, and streaming subscriptions.
+- **LedgerConnect.js**: Facilitates connecting to the Ledger wallet for transactions.
+
+### Pages
+
+- **HomePage.js**: Displays trending content, sports engagement, and recommended creators.
+- **ProfilePage.js**: Provides an overview of a user's content, NFTs, and memberships.
+- **ContentPage.js**: Shows detailed content view, including licensing options and cross-chain interactions.
+
+## Backend Modules
+
+- **app.js**: Main backend server, runs using Node.js/Express.
+- **routes/**: Includes different API endpoints for handling user authentication, NFT minting, payments, attestations, etc.
+- **services/**: Connects the backend to the blockchain for operations such as payments, attestations, and cross-chain messaging.
+- **middlewares/**: Security and verification middleware for handling user authentication and blockchain interactions.
+
+## Smart Contracts
+
+- **KosmaNFT.sol**: Handles NFT minting, royalty distribution, and licensing management .
+- **LayerZeroMessaging.sol**: Facilitates cross-chain messaging using LayerZero V2.
+- **SignAttestations.sol**: Uses Sign Protocol to manage attestations for ownership, licensing, and verification.
+- **StoryIntegration.sol**: Manages content licensing, royalties, and disputes using Story Protocol.
+- **KosmaPayments.sol**: Handles payments using Circle USDC and Superfluid for streaming.
+- **UnlockMemberships.sol**: Manages memberships for premium content using Unlock Protocol.
+
+## Deployment
+
+### Contracts Deployment:
+Smart contracts are deployed using **Truffle** or **Hardhat**.
+
+### Frontend Deployment:
+The frontend is deployed to a hosting service using `deployFrontend.sh`.
+
+### Subgraph Creation:
+Use `/scripts/createSubgraph.js` to create a subgraph for indexing data using **The Graph**.
+
+## Installation and Setup
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/yourusername/kosma.git
+   cd kosma
+2. **Install Dependencies:**
+    ```bash
+    npm install
+3. **Environment Configuration: Copy .env.example to .env and fill in the necessary credentials and blockchain keys.**
+4. **Start Backend Server:**
+    ```bash
+    npm run start-backend
+5. **Start Frontend Application:**
+    ```bash
+    npm run start-frontend
+6. **Deploy Smart Contracts: Follow the steps in /docs/deploymentGuide.md to deploy contracts.**
+
+## Usage
+1. Connect Wallet: Connect your Ledger wallet using the Navbar.
+2. Mint NFTs: Use the profile page to create NFTs for your content.
+3. License Content: View and set licensing terms on the content page.
+Join Memberships: Purchase memberships using Unlock Protocol to access exclusive content.
+
+## Contribution Guidelines
+We welcome contributions to Kosma! Please follow these steps:
+
+Fork the Repository: Fork and clone the repository to your local machine.
+Create a Feature Branch: Create a branch for your feature or bug fix.
+Commit Your Changes: Make sure to add detailed commit messages.
+Push to Your Branch: Push your branch to your fork.
+Open a Pull Request: Open a pull request against the main repository.
+For detailed contribution guidelines, see /docs/developmentGuidelines.md.
+
+## License
+
+Kosma is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+
+### Acknowledgments
+
+- We would like to thank the developers and contributors of the libraries and protocols used in this project.
+- Special thanks to the open-source community for their continuous support and contributions.
+
+### Contact
+
+For any inquiries or feedback, please reach out to us at [contact@kosma.com](mailto:contact@kosma.com).
