@@ -1,163 +1,158 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "layerzero/contracts/LayerZeroEndpoint.sol";
+import "storyprotocol/contracts/StoryProtocol.sol";
 
-contract KosmaNFT is ERC721URIStorage, Ownable, ReentrancyGuard, AccessControl, Initializable {
+contract KosmaNFT is ERC721URIStorage, AccessControl, ReentrancyGuard, Initializable {
     using Counters for Counters.Counter;
-    Counters.Counter private _tokenIdCounter;
+    Counters.Counter private _tokenIds;
 
-    bytes32 public constant CREATOR_ROLE = keccak256("CREATOR_ROLE");
-    bytes32 public constant DAO_ROLE = keccak256("DAO_ROLE");
-
-    // Mapping of NFTs to their respective metadata
-    mapping(uint256 => NFTMetadata) private nftMetadata;
-
-    // Struct to hold NFT metadata
-    struct NFTMetadata {
-        string name;
-        string description; // Consider storing off-chain for gas optimization
-        string license; // Consider storing off-chain for gas optimization
-        uint256 royaltyPercentage;
-        address creator;
-        bool isRoyaltyEnforced; // Flag to indicate if royalty enforcement is required
+    struct RoyaltyInfo {
+        address[] creators;
+        uint256[] royaltyPercentages;
+        uint256 nextAllowedUpdate;
     }
 
-    // Events
-    event NFTMinted(uint256 indexed tokenId, address indexed creator);
-    event NFTTransferred(uint256 indexed tokenId, address indexed from, address indexed to);
-    event RoyaltiesPaid(uint256 indexed tokenId, address indexed creator, uint256 amount);
-    event NFTBurned(uint256 indexed tokenId);
-
-    // Minting enabled flag
-    bool public mintingEnabled = true;
-
-    // Custom Errors for Gas Optimization
-    error MintingDisabled();
-    error UnauthorizedCreator();
-    error InvalidRoyalty(uint256 maxRoyalty);
-    error NotNFTOwner(address caller);
-    error InvalidRecipientAddress();
-    error InsufficientRoyalty(uint256 sentAmount, uint256 requiredAmount);
-
-    // Constructor function
-    constructor() ERC721("KosmaNFT", "KNFT") {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender); // Grant the contract deployer the default admin role
+    struct LicenseInfo {
+        address licensee;
+        uint256 licenseFee;
+        uint256 expirationDate;
+        string usageRights;
     }
 
-    // Function to initialize contract (for upgradeable proxy)
-    function initialize() public initializer {
+    IERC20 public immutable usdcToken; // Immutable to save gas
+    LayerZeroEndpoint public immutable layerZeroEndpoint; // Immutable for cross-chain use
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
+    mapping(uint256 => RoyaltyInfo) public royalties;
+    mapping(uint256 => LicenseInfo[]) public licenses;
+    mapping(uint256 => string) public metadataHashes;
+    uint256 public mintingFee;
+
+    event NFTMinted(uint256 indexed tokenId, address indexed creator, string tokenURI, uint256[] royaltyPercentages);
+    event RoyaltyPaid(address indexed creator, uint256 indexed tokenId, uint256 amount);
+    event ContentLicensed(address indexed licensee, uint256 indexed tokenId, uint256 fee, string usageRights);
+    event NFTTransferredCrossChain(uint256 indexed tokenId, address indexed owner, string destinationChain);
+    event RoyaltyUpdated(uint256 indexed tokenId, uint256[] newRoyaltyPercentages);
+    event LicenseTermsSet(uint256 indexed tokenId, string licenseTerms);
+
+    constructor(address _usdcTokenAddress, address _layerZeroEndpointAddress) ERC721("KosmaNFT", "KNFT") {
+        usdcToken = IERC20(_usdcTokenAddress);
+        layerZeroEndpoint = LayerZeroEndpoint(_layerZeroEndpointAddress);
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(DAO_ROLE, msg.sender);
+        _setupRole(ADMIN_ROLE, msg.sender);
     }
 
-    // Function to enable or disable minting
-    function setMintingEnabled(bool enabled) public onlyRole(DAO_ROLE) {
-        mintingEnabled = enabled;
+    modifier onlyOwnerOrCreator(uint256 tokenId) {
+        require(ownerOf(tokenId) == msg.sender || hasRole(ADMIN_ROLE, msg.sender), "Not authorized");
+        _;
     }
 
-    // Function to mint an NFT
+    function setMintingFee(uint256 _fee) external onlyRole(ADMIN_ROLE) {
+        mintingFee = _fee;
+    }
+
     function mintNFT(
-        string memory _name,
-        string memory _description,
-        string memory _license,
-        uint256 _royaltyPercentage,
-        string memory _tokenURI,
-        bool _isRoyaltyEnforced // New parameter for royalty enforcement
-    ) public {
-        if (!mintingEnabled) revert MintingDisabled();
-        if (_royaltyPercentage > 30) revert InvalidRoyalty(30);
-        if (!hasRole(CREATOR_ROLE, msg.sender)) revert UnauthorizedCreator();
+        string memory title,
+        string memory description,
+        string memory tokenURI,
+        string memory metadataHash,
+        address[] memory creators,
+        uint256[] memory royaltyPercentages
+    ) external payable nonReentrant {
+        require(msg.value == mintingFee, "Incorrect minting fee");
+        require(creators.length == royaltyPercentages.length, "Creators and royalties length mismatch");
+        require(_validRoyalty(royaltyPercentages), "Invalid royalty values");
 
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _mint(msg.sender, tokenId);
+        _tokenIds.increment();
+        uint256 newItemId = _tokenIds.current();
 
-        nftMetadata[tokenId] = NFTMetadata(
-            _name,
-            _description,
-            _license,
-            _royaltyPercentage,
-            msg.sender,
-            _isRoyaltyEnforced
-        );
+        _mint(msg.sender, newItemId);
+        _setTokenURI(newItemId, tokenURI);
+        metadataHashes[newItemId] = metadataHash;
 
-        _setTokenURI(tokenId, _tokenURI);
-        emit NFTMinted(tokenId, msg.sender);
+        royalties[newItemId] = RoyaltyInfo({
+            creators: creators,
+            royaltyPercentages: royaltyPercentages,
+            nextAllowedUpdate: block.timestamp + 30 days
+        });
+
+        emit NFTMinted(newItemId, msg.sender, tokenURI, royaltyPercentages);
     }
 
-    // Internal function for royalty payment calculation
-    function _calculateRoyalty(uint256 salePrice, uint256 royaltyPercentage) internal pure returns (uint256) {
-        return (salePrice * royaltyPercentage) / 100;
-    }
-
-    // Function to transfer an NFT with royalty payment
-    function safeTransferWithRoyalty(address to, uint256 tokenId, uint256 salePrice) public payable nonReentrant {
-        if (ownerOf(tokenId) != msg.sender) revert NotNFTOwner(msg.sender);
-        if (to == address(0)) revert InvalidRecipientAddress(); // Prevent transfers to zero address
-
-        NFTMetadata memory metadata = nftMetadata[tokenId];
-
-        if (metadata.isRoyaltyEnforced) {
-            uint256 royaltyAmount = _calculateRoyalty(salePrice, metadata.royaltyPercentage);
-            if (msg.value < royaltyAmount) revert InsufficientRoyalty(msg.value, royaltyAmount);
-
-            // Pay the royalty to the creator
-            payable(metadata.creator).transfer(royaltyAmount);
-
-            // Refund any excess amount sent
-            if (msg.value > royaltyAmount) {
-                payable(msg.sender).transfer(msg.value - royaltyAmount);
-            }
+    function _validRoyalty(uint256[] memory royaltyPercentages) internal pure returns (bool) {
+        uint256 totalRoyalty;
+        for (uint256 i = 0; i < royaltyPercentages.length; i++) {
+            totalRoyalty += royaltyPercentages[i];
         }
-
-        // Transfer the NFT
-        safeTransferFrom(msg.sender, to, tokenId);
-        emit NFTTransferred(tokenId, msg.sender, to);
+        return totalRoyalty <= 100;
     }
 
-    // Function to allow users to burn their own NFTs
-    function burnNFT(uint256 tokenId) public {
-        if (ownerOf(tokenId) != msg.sender && msg.sender != owner()) revert NotNFTOwner(msg.sender);
+    function distributeRoyalty(uint256 tokenId, uint256 salePrice) external nonReentrant {
+        RoyaltyInfo memory royalty = royalties[tokenId];
+        for (uint256 i = 0; i < royalty.creators.length; i++) {
+            uint256 royaltyAmount = (salePrice * royalty.royaltyPercentages[i]) / 100;
+            require(usdcToken.transferFrom(msg.sender, royalty.creators[i], royaltyAmount), "Royalty payment failed");
+            emit RoyaltyPaid(royalty.creators[i], tokenId, royaltyAmount);
+        }
+    }
+
+    function updateRoyalty(uint256 tokenId, uint256[] memory newRoyaltyPercentages) external onlyOwnerOrCreator(tokenId) nonReentrant {
+        require(_validRoyalty(newRoyaltyPercentages), "Invalid royalty values");
+        require(block.timestamp > royalties[tokenId].nextAllowedUpdate, "Royalty update cooldown period active");
+
+        royalties[tokenId].royaltyPercentages = newRoyaltyPercentages;
+        royalties[tokenId].nextAllowedUpdate = block.timestamp + 30 days;
+
+        emit RoyaltyUpdated(tokenId, newRoyaltyPercentages);
+    }
+
+    function licenseContent(
+        uint256 tokenId,
+        uint256 fee,
+        uint256 duration,
+        string memory usageRights
+    ) external nonReentrant {
+        require(ownerOf(tokenId) != msg.sender, "Cannot license your own content");
+
+        LicenseInfo memory licenseInfo = LicenseInfo({
+            licensee: msg.sender,
+            licenseFee: fee,
+            expirationDate: block.timestamp + duration,
+            usageRights: usageRights
+        });
+
+        licenses[tokenId].push(licenseInfo);
+        require(usdcToken.transferFrom(msg.sender, royalties[tokenId].creators[0], fee), "License fee payment failed");
+
+        emit ContentLicensed(msg.sender, tokenId, fee, usageRights);
+    }
+
+    function getLicenses(uint256 tokenId) external view returns (LicenseInfo[] memory) {
+        return licenses[tokenId];
+    }
+
+    function transferNFTCrossChain(uint256 tokenId, string memory destinationChain) external nonReentrant {
+        require(ownerOf(tokenId) == msg.sender, "You are not the owner of this NFT");
+
         _burn(tokenId);
-        delete nftMetadata[tokenId];
-        emit NFTBurned(tokenId);
+        layerZeroEndpoint.send(destinationChain, msg.sender, tokenId);
+
+        emit NFTTransferredCrossChain(tokenId, msg.sender, destinationChain);
     }
 
-    // Function to update NFT metadata
-    function updateMetadata(uint256 tokenId, string memory newDescription, string memory newLicense) public {
-        if (nftMetadata[tokenId].creator != msg.sender) revert UnauthorizedCreator();
-        nftMetadata[tokenId].description = newDescription;
-        nftMetadata[tokenId].license = newLicense;
+    function validateMetadata(uint256 tokenId, string memory metadataHash) external view returns (bool) {
+        return keccak256(abi.encodePacked(metadataHashes[tokenId])) == keccak256(abi.encodePacked(metadataHash));
     }
 
-    // Function to get NFT metadata
-    function getNFTMetadata(uint256 _tokenId)
-        public
-        view
-        returns (
-            string memory,
-            string memory,
-            string memory,
-            uint256,
-            address,
-            bool
-        )
-    {
-        NFTMetadata memory metadata = nftMetadata[_tokenId];
-        return (
-            metadata.name,
-            metadata.description,
-            metadata.license,
-            metadata.royaltyPercentage,
-            metadata.creator,
-            metadata.isRoyaltyEnforced
-        );
+    function setLicenseTerms(uint256 tokenId, string memory licenseTerms) external onlyOwnerOrCreator(tokenId) {
+        emit LicenseTermsSet(tokenId, licenseTerms);
     }
 }
