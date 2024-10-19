@@ -4,20 +4,20 @@
     "description": "Kosma - A Decentralized Social Media Platform",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js",                       // Start the backend application
-        "dev": "nodemon index.js",                      // Start in development mode with live reloading
-        "test": "jest --coverage",                     // Run unit tests with code coverage report
-        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",    // Lint JavaScript and TypeScript files
-        "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix", // Automatically fix linting issues
-        "build": "webpack --mode production",          // Build for production
-        "build:dev": "webpack --mode development",     // Build for development
-        "test:integration": "cypress run",             // Run integration/end-to-end tests
-        "test:contracts": "hardhat test",              // Run tests for smart contracts
-        "deploy:contracts": "hardhat run scripts/deployContracts.js --network mainnet", // Deploy contracts
-        "deploy:frontend": "bash ./scripts/deployFrontend.sh", // Deploy frontend using script
-        "deploy": "npm run build && npm start",        // Build and then start the backend app
-        "type-check": "tsc --noEmit",                  // Check TypeScript types without emitting files
-        "format": "prettier --write ."                 // Format code using Prettier
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "test": "jest --coverage",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+        "build": "webpack --mode production",
+        "build:dev": "webpack --mode development",
+        "test:integration": "cypress run",
+        "test:contracts": "hardhat test",
+        "deploy:contracts": "hardhat run scripts/deployContracts.js --network mainnet",
+        "deploy:frontend": "bash ./scripts/deployFrontend.sh",
+        "deploy": "npm run build && npm start",
+        "type-check": "tsc --noEmit",
+        "format": "prettier --write ."
     },
     "keywords": [
         "decentralized", "social media", "blockchain", "nft", "cross-chain", "privacy", "kosma"
@@ -25,44 +25,41 @@
     "author": "Karthik",
     "license": "ISC",
     "dependencies": {
-        "dotenv": "^16.4.5",                           // Environment variable management
-        "mongoose": "^8.7.2",                          // MongoDB ORM
-        "express": "^4.18.2",                          // Web server framework
-        "cors": "^2.8.5",                              // Enable Cross-Origin requests
-        "axios": "^1.2.2",                             // HTTP client
-        "web3": "^1.7.5",                              // Blockchain interaction library
-        "ethers": "^5.7.0",                            // Ethereum blockchain library
-        "bcrypt": "^5.1.0",                            // Password hashing
-        "jsonwebtoken": "^8.5.1",                      // JSON Web Token for authentication
-        "morgan": "^1.10.0",                           // HTTP request logging middleware
-        "helmet": "^6.0.0",                            // Security middleware for Express
-        "superfluid-finance": "^1.0.0",                // For streaming payments
-        "truffle-plugin-verify": "^0.6.3",             // Verify contracts on Etherscan
-        "hardhat": "^2.12.7",                          // Ethereum development environment
-        "ipfs-http-client": "^59.0.0",                 // Interact with IPFS
-        "circle-api": "^1.0.0",                        // Integrate with Circle for USDC payments
-        "layerzero-sdk": "^2.0.0"                      // Cross-chain messaging SDK
+        "dotenv": "^16.4.5",
+        "mongoose": "^8.7.2",
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "axios": "^1.2.2",
+        "web3": "^1.7.5",
+        "ethers": "^5.7.0",
+        "bcrypt": "^5.1.0",
+        "jsonwebtoken": "^8.5.1",
+        "morgan": "^1.10.0",
+        "helmet": "^6.0.0",
+        "superfluid-finance": "^1.0.0",
+        "truffle-plugin-verify": "^0.6.3",
+        "hardhat": "^2.12.7",
+        "ipfs-http-client": "^59.0.0",
+        "circle-api": "^1.0.0",
+        "layerzero-sdk": "^2.0.0"
     },
     "devDependencies": {
-        "nodemon": "^2.0.22",                          // Auto-restart server during development
-        "eslint": "^8.34.0",                           // JavaScript linter
-        "eslint-plugin-node": "^11.1.0",               // Node.js specific linting rules
-        "eslint-config-prettier": "^8.5.0",            // Disable rules that conflict with Prettier
-        "jest": "^29.4.0",                             // Unit testing framework
-        "cypress": "^12.4.0",                          // End-to-end testing framework
-        "webpack": "^5.75.0",                          // JavaScript bundler
-        "webpack-cli": "^5.0.1",                       // Webpack command-line interface
-        "babel-loader": "^8.3.0",                      // Babel loader for Webpack (transpiles JS/TS)
-        "typescript": "^4.9.5",                        // TypeScript support
-        "ts-node": "^10.9.1",                          // Run TypeScript code directly
-        "prettier": "^2.8.0",                          // Code formatter
-        "eslint-plugin-prettier": "^4.2.1",            // Integrate Prettier with ESLint
-        "hardhat-gas-reporter": "^1.0.9",              // Gas usage reporting for smart contract tests
-        "solidity-coverage": "^0.7.22",                // Smart contract test coverage
-        "dotenv-webpack": "^8.0.1",                    // Use .env files with Webpack
-        "superfluid-finance": "^1.0.0",                // For streaming payments
-        "circle-api": "^1.0.0",                        // Circle integration for payments
-        "layerzero-sdk": "^2.0.0"                      // Cross-chain messaging SDK
+        "nodemon": "^2.0.22",
+        "eslint": "^8.34.0",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-config-prettier": "^8.5.0",
+        "jest": "^29.4.0",
+        "cypress": "^12.4.0",
+        "webpack": "^5.75.0",
+        "webpack-cli": "^5.0.1",
+        "babel-loader": "^8.3.0",
+        "typescript": "^4.9.5",
+        "ts-node": "^10.9.1",
+        "prettier": "^2.8.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "hardhat-gas-reporter": "^1.0.9",
+        "solidity-coverage": "^0.7.22",
+        "dotenv-webpack": "^8.0.1"
     },
     "eslintConfig": {
         "env": {
@@ -90,7 +87,7 @@
         "testTimeout": 30000
     },
     "cypress": {
-        "baseUrl": "http://localhost:3000",            // Adjust according to your dev environment
+        "baseUrl": "http://localhost:3000",
         "viewportWidth": 1280,
         "viewportHeight": 720
     }
