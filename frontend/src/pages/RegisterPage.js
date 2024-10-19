@@ -1,60 +1,135 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
+import zxcvbn from 'zxcvbn'; // For password strength meter
+import ReCAPTCHA from 'react-google-recaptcha'; // For CAPTCHA
 
 const RegisterPage = () => {
-  // State to manage form inputs and blockchain address
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
+    confirmPassword: '',
+    agreeTerms: false,
   });
   const [blockchainAddress, setBlockchainAddress] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+
+  // CSRF Token handling using Axios Interceptor
+  useEffect(() => {
+    axios.interceptors.request.use((config) => {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      config.headers['X-CSRF-Token'] = csrfToken;
+      return config;
+    }, (error) => {
+      return Promise.reject(error);
+    });
+  }, []);
 
   // Handle form field changes
   const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: type === 'checkbox' ? checked : value,
     });
+
+    if (name === 'password') {
+      const strength = zxcvbn(value);
+      setPasswordStrength(strength.score);
+    }
   };
 
-  // Function to validate the password based on the given requirements
-  const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    return passwordRegex.test(password);
+  // Validate password strength
+  const suggestStrongPassword = (score) => {
+    if (score < 3) {
+      return 'Your password is too weak. Try including more characters, symbols, and numbers.';
+    }
+    return '';
   };
 
-  // Function to validate the username: case-sensitive, only letters and numbers
-  const validateUsername = (username) => {
-    const usernameRegex = /^[a-zA-Z0-9]+$/;
-    return usernameRegex.test(username);
+  // Validate email format
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
-  // Form validation
+  // Handle CAPTCHA verification
+  const onCaptchaVerify = (value) => {
+    setCaptchaVerified(true); // In a real app, send the value to backend for verification
+  };
+
+  // Check username availability
+  const checkUsernameAvailability = async (username) => {
+    try {
+      const response = await axios.get(`/auth/check-username?username=${username}`);
+      if (!response.data.available) {
+        setErrors((prevErrors) => ({ ...prevErrors, username: 'Username is already taken' }));
+      } else {
+        setErrors((prevErrors) => ({ ...prevErrors, username: '' }));
+      }
+    } catch (error) {
+      setErrors((prevErrors) => ({ ...prevErrors, username: 'Error checking username availability' }));
+    }
+  };
+
+  // Check email availability
+  const checkEmailAvailability = async (email) => {
+    try {
+      const response = await axios.get(`/auth/check-email?email=${email}`);
+      if (!response.data.available) {
+        setErrors((prevErrors) => ({ ...prevErrors, email: 'Email is already in use' }));
+      } else {
+        setErrors((prevErrors) => ({ ...prevErrors, email: '' }));
+      }
+    } catch (error) {
+      setErrors((prevErrors) => ({ ...prevErrors, email: 'Error checking email availability' }));
+    }
+  };
+
+  // Validate form inputs
   const validateForm = () => {
     let newErrors = {};
+
     if (!formData.username) {
       newErrors.username = 'Username is required';
-    } else if (!validateUsername(formData.username)) {
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.username)) {
       newErrors.username = 'Username can only contain letters and numbers';
     }
 
-    if (!formData.email) newErrors.email = 'Email is required';
-    
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (!validatePassword(formData.password)) {
-      newErrors.password = 'Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, one number, and one special character.';
+    } else if (passwordStrength < 3) {
+      newErrors.password = suggestStrongPassword(passwordStrength);
     }
-    
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (!formData.agreeTerms) {
+      newErrors.agreeTerms = 'You must agree to the Terms of Service and Privacy Policy';
+    }
+
+    if (!captchaVerified) {
+      newErrors.captcha = 'Please verify that you are not a robot';
+    }
+
     return newErrors;
   };
 
-  // Function to generate a unique blockchain address using Ethers.js
+  // Generate unique blockchain address using Ethers.js
   const generateBlockchainAddress = () => {
     const wallet = ethers.Wallet.createRandom();
     setBlockchainAddress(wallet.address); // Store the generated address
@@ -85,12 +160,14 @@ const RegisterPage = () => {
       };
 
       // Make the API call to the backend /auth/register endpoint
-      const response = await axios.post('/auth/register', registerData);
+      const response = await axios.post('/auth/register', registerData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      // Store the blockchain address in the frontend state and show success message
       if (response.status === 200) {
-        setSuccessMessage('Registration successful!');
-        // Optionally, you could store the blockchain address in localStorage or other storage
+        setSuccessMessage('Registration successful! Please verify your email.');
       }
     } catch (error) {
       setErrors({ submit: 'Registration failed. Please try again.' });
@@ -103,6 +180,8 @@ const RegisterPage = () => {
     <div className="register-page">
       <h2>Register for Kosma</h2>
       <form onSubmit={handleSubmit}>
+
+        {/* Username Field */}
         <div className="form-group">
           <label>Username</label>
           <input
@@ -110,11 +189,13 @@ const RegisterPage = () => {
             name="username"
             value={formData.username}
             onChange={handleChange}
+            onBlur={() => checkUsernameAvailability(formData.username)}
             required
           />
           {errors.username && <p className="error">{errors.username}</p>}
         </div>
 
+        {/* Email Field */}
         <div className="form-group">
           <label>Email</label>
           <input
@@ -122,26 +203,68 @@ const RegisterPage = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
+            onBlur={() => checkEmailAvailability(formData.email)}
             required
           />
           {errors.email && <p className="error">{errors.email}</p>}
         </div>
 
+        {/* Password Field */}
         <div className="form-group">
           <label>Password</label>
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
             onChange={handleChange}
             required
+            autoComplete={navigator.userAgent.includes('Android') || navigator.userAgent.includes('iPhone') ? 'off' : 'new-password'} // Password autofill for Android/iOS
           />
+          <button type="button" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? 'Hide' : 'Show'}
+          </button>
+          <p>Password Strength: {passwordStrength >= 3 ? 'Strong' : 'Weak'}</p>
           {errors.password && <p className="error">{errors.password}</p>}
         </div>
 
+        {/* Confirm Password Field */}
+        <div className="form-group">
+          <label>Confirm Password</label>
+          <input
+            type={showPassword ? 'text' : 'password'}
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
+          {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
+        </div>
+
+        {/* CAPTCHA */}
+        <div className="form-group">
+          <ReCAPTCHA sitekey="your-site-key" onChange={onCaptchaVerify} />
+          {errors.captcha && <p className="error">{errors.captcha}</p>}
+        </div>
+
+        {/* Terms of Service */}
+        <div className="form-group">
+          <input
+            type="checkbox"
+            name="agreeTerms"
+            checked={formData.agreeTerms}
+            onChange={handleChange}
+            required
+          />
+          <label>
+            I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
+          </label>
+          {errors.agreeTerms && <p className="error">{errors.agreeTerms}</p>}
+        </div>
+
+        {/* Submit Button */}
         <div className="form-group">
           <button type="submit" disabled={loading}>
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? <span className="spinner" /> : 'Register'}
           </button>
         </div>
 
@@ -149,10 +272,14 @@ const RegisterPage = () => {
         {successMessage && <p className="success">{successMessage}</p>}
       </form>
 
+      {/* Blockchain Address Explanation */}
       {blockchainAddress && (
         <div className="blockchain-address">
           <p>Your unique blockchain address:</p>
           <strong>{blockchainAddress}</strong>
+          <small>
+            This address uniquely identifies you on the Kosma platform, ensuring security and privacy.
+          </small>
         </div>
       )}
     </div>
