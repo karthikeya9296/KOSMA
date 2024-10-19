@@ -1,1 +1,88 @@
+name: CI/CD Workflow for Polygon Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Lint and Test Code
+        run: |
+          npm run lint
+          npm run test
+
+  deploy:
+    needs: setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Deploy Smart Contracts to Polygon
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          POLYGON_RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
+        run: npx hardhat run scripts/deploy-polygon.js --network polygon
+
+      - name: Deploy AI Service (Polygon PoS)
+        run: |
+          # Make sure your AI service integrates with on-chain components
+          npm run deploy-ai-service
+
+      - name: Deploy Frontend to Firebase
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: npm run deploy-frontend
+
+  testnet-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Deploy to Amoy Testnet
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          TESTNET_RPC_URL: "https://rpc-amoy.polygon.technology/"
+        run: npx hardhat run scripts/deploy-polygon.js --network amoy
+
+      - name: Notify on Successful Deployment
+        run: echo "Successfully deployed to Polygon Amoy testnet!"
 
