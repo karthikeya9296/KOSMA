@@ -1,4 +1,3 @@
-// Import necessary libraries
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -172,4 +171,12 @@ router.post('/login', loginLimiter, [
  * @route POST /logout
  */
 router.post('/logout', authenticateJWT, (req, res) => {
-    // In JWT, 
+    // In JWT, since it's stateless, "logout" is handled by the client removing the token.
+    res.json({ message: 'Logged out successfully' });
+});
+
+// Error-handling middleware for catching and returning errors
+router.use(errorHandler);
+
+// Export the router
+module.exports = router;
