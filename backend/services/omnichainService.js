@@ -1,5 +1,7 @@
 // Import necessary libraries and modules
 const { ethers } = require('ethers');
+const express = require('express');
+const jwt = require('jsonwebtoken'); // For user authentication
 const LayerZero = require('./LayerZero'); // LayerZero for omnichain messaging
 const NFTContract = require('./NFTContract'); // NFT contract for handling NFT operations
 const User = require('./models/User'); // User model to fetch user data
@@ -8,137 +10,14 @@ const User = require('./models/User'); // User model to fetch user data
 const provider = new ethers.providers.JsonRpcProvider(process.env.BLOCKCHAIN_RPC_URL);
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
-/**
- * Send Cross-Chain Message with retry logic and gas fee estimation
- * @param {string} targetChain - The target blockchain to send the message to
- * @param {string} message - The message to send
- * @returns {Promise<string>} - Transaction hash of the message sending
- */
-async function sendCrossChainMessage(targetChain, message) {
-    try {
-        // Estimate gas fee for sending message
-        const gasEstimate = await LayerZero.estimateGas.sendMessage(targetChain, message);
+// Initialize Express app for UI and API
+const app = express();
+app.use(express.json());
 
-        let retries = 0;
-        let tx = null;
-        while (!tx && retries < 3) {
-            try {
-                tx = await LayerZero.sendMessage(targetChain, message, { gasLimit: gasEstimate });
-                await tx.wait(); // Wait for transaction confirmation
-            } catch (error) {
-                retries += 1;
-                console.error(`Retry ${retries}: Error sending cross-chain message`, error);
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Retry after 1 second
-            }
-        }
+// JWT Secret for Authentication
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
-        if (!tx) {
-            throw new Error('Cross-chain message sending failed after 3 retries');
-        }
-
-        return tx.hash;
-    } catch (error) {
-        console.error('Error sending cross-chain message:', error);
-        throw new Error('Cross-chain message sending failed');
-    }
-}
-
-/**
- * Receive Cross-Chain Message with optional encryption and real-time event listener
- * @param {string} sourceChain - The source blockchain from which the message is received
- * @param {string} message - The message received
- * @returns {Promise<void>}
- */
-async function receiveCrossChainMessage(sourceChain, message) {
-    try {
-        // Decrypt the message if encryption is applied (optional)
-        // const decryptedMessage = decryptMessage(message);
-
-        console.log(`Received message from ${sourceChain}:`, message);
-        // Add logic to handle the message based on its content, e.g., process NFT transfers, licenses, etc.
-
-        // Optionally trigger event listeners to notify the system or users in real-time
-    } catch (error) {
-        console.error('Error receiving cross-chain message:', error);
-        throw new Error('Cross-chain message receiving failed');
-    }
-}
-
-/**
- * Verify Received Message with nonce management
- * @param {string} message - The message to verify
- * @param {number} nonce - The nonce to prevent replay attacks
- * @returns {Promise<boolean>} - True if the message is valid, false otherwise
- */
-async function verifyMessage(message, nonce) {
-    try {
-        const isValid = await LayerZero.verifyMessage(message, nonce);
-        return isValid;
-    } catch (error) {
-        console.error('Error verifying message:', error);
-        throw new Error('Message verification failed');
-    }
-}
-
-/**
- * Transfer NFT Cross-Chain with gas estimation and batch processing
- * @param {string} nftId - ID of the NFT to transfer
- * @param {string} targetChain - The target blockchain to transfer the NFT to
- * @returns {Promise<string>} - Transaction hash of the NFT transfer
- */
-async function transferNFTCrossChain(nftId, targetChain) {
-    try {
-        const user = await User.findOne({ blockchainAddress: signer.address });
-        if (!user) throw new Error('User not found');
-
-        // Estimate gas fees for locking and minting
-        const gasLock = await NFTContract.estimateGas.lockNFT(nftId, user.blockchainAddress);
-        const gasMint = await LayerZero.estimateGas.mintNFT(nftId, targetChain, user.blockchainAddress);
-
-        // Lock the NFT on the source chain
-        const txLock = await NFTContract.lockNFT(nftId, user.blockchainAddress, { gasLimit: gasLock });
-        await txLock.wait(); // Wait for transaction confirmation
-
-        // Mint the NFT on the target chain
-        const txMint = await LayerZero.mintNFT(nftId, targetChain, user.blockchainAddress, { gasLimit: gasMint });
-        await txMint.wait(); // Wait for transaction confirmation
-
-        return txMint.hash;
-    } catch (error) {
-        console.error('Error transferring NFT cross-chain:', error);
-        throw new Error('NFT cross-chain transfer failed');
-    }
-}
-
-// Export the functions for use in other modules
-module.exports = {
-    sendCrossChainMessage,
-    receiveCrossChainMessage,
-    verifyMessage,
-    transferNFTCrossChain,
-=======
-const { ethers } = require('ethers');
-const LayerZeroEndpoint = require('@layerzerolabs/LayerZeroEndpoint');
-
-// Load your compiled LayerZeroMessaging.sol contract ABI and address
-const LayerZeroMessagingABI = require('./abi/LayerZeroMessaging.json');
-const contractAddress = "YOUR_CONTRACT_ADDRESS"; // Deployed LayerZeroMessaging.sol contract address
-
-// Load provider and signer (Wallet)
-const provider = new ethers.providers.JsonRpcProvider("RPC_PROVIDER_URL"); // RPC provider (Infura, Alchemy, etc.)
-const signer = new ethers.Wallet('YOUR_PRIVATE_KEY', provider); // Replace with your private key
-
-// Create contract instance
-const layerZeroMessagingContract = new ethers.Contract(contractAddress, LayerZeroMessagingABI, signer);
-
-// LayerZero Endpoint address and SDK initialization
-const endpointAddress = 'LAYERZERO_ENDPOINT_ADDRESS'; // Replace with actual LayerZero endpoint address
-const layerZeroEndpoint = new LayerZeroEndpoint(endpointAddress);
-
-// Event listener for cross-chain events
-const eventEmitter = layerZeroMessagingContract.connect(provider);
-
-// Dynamic rate-limiting mechanism
+// Rate limiting configuration
 const transferRequestCounts = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 60 seconds
 const MAX_REQUESTS_PER_WINDOW = 5; // Max requests per minute
@@ -173,6 +52,18 @@ async function retryTransaction(txFunction, maxRetries = 3, delay = 2000) {
     }
 }
 
+// Middleware for user authentication
+function authenticateToken(req, res, next) {
+    const token = req.header('Authorization')?.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+}
+
 // Initiate Cross-Chain NFT Transfer
 async function initiateNFTTransfer(destChainId, to, tokenId, maxGasFee) {
     try {
@@ -186,7 +77,7 @@ async function initiateNFTTransfer(destChainId, to, tokenId, maxGasFee) {
         const gasFee = ethers.utils.parseEther(maxGasFee.toString()); // Ensure BigNumber precision for gas fee
 
         const tx = await retryTransaction(() =>
-            layerZeroMessagingContract.initiateTransfer(destChainId, to, tokenId, gasFee, { value: gasFee })
+            NFTContract.initiateTransfer(destChainId, to, tokenId, gasFee, { value: gasFee })
         );
 
         console.log(`NFT transfer initiated. Transaction hash: ${tx.hash}`);
@@ -204,7 +95,7 @@ async function lzReceive(srcChainId, payload, signature) {
     try {
         // Verify the signature
         const recoveredSigner = ethers.utils.verifyMessage(payload, signature);
-        const isAdmin = await layerZeroMessagingContract.hasRole(ethers.utils.id('ADMIN_ROLE'), recoveredSigner);
+        const isAdmin = await NFTContract.hasRole(ethers.utils.id('ADMIN_ROLE'), recoveredSigner);
 
         if (!isAdmin) throw new Error("Unauthorized signer for the message");
 
@@ -216,7 +107,7 @@ async function lzReceive(srcChainId, payload, signature) {
         if (!Number.isInteger(tokenId) || tokenId <= 0) throw new Error('Invalid token ID.');
 
         // Process the cross-chain message and mint the NFT on the new chain
-        const tx = await layerZeroMessagingContract.lzReceive(srcChainId, payload, signature);
+        const tx = await NFTContract.lzReceive(srcChainId, payload, signature);
         await tx.wait(); // Wait for the transaction to complete
         console.log(`Cross-chain NFT transfer completed for token ${tokenId}`);
         return tx;
@@ -229,7 +120,7 @@ async function lzReceive(srcChainId, payload, signature) {
 // Monitor contract events for cross-chain messaging
 async function monitorEvents() {
     try {
-        eventEmitter.on("TransferInitiated", async (from, to, tokenId, destChainId) => {
+        NFTContract.on("TransferInitiated", async (from, to, tokenId, destChainId) => {
             try {
                 console.log({
                     event: 'TransferInitiated',
@@ -244,7 +135,7 @@ async function monitorEvents() {
             }
         });
 
-        eventEmitter.on("TransferCompleted", async (owner, tokenId, srcChainId) => {
+        NFTContract.on("TransferCompleted", async (owner, tokenId, srcChainId) => {
             try {
                 console.log({
                     event: 'TransferCompleted',
@@ -257,51 +148,59 @@ async function monitorEvents() {
                 console.error(`Error handling TransferCompleted event: ${error.message}`);
             }
         });
-
-        eventEmitter.on("FailedTransfer", async (owner, tokenId, srcChainId, reason) => {
-            try {
-                console.error({
-                    event: 'FailedTransfer',
-                    owner,
-                    tokenId,
-                    srcChainId,
-                    reason,
-                    timestamp: new Date().toISOString(),
-                });
-            } catch (error) {
-                console.error(`Error handling FailedTransfer event: ${error.message}`);
-            }
-        });
     } catch (error) {
         console.error(`Error monitoring contract events: ${error.message}`);
         throw error;
     }
 }
 
-// Verify Cross-Chain Messages (Authenticity check)
-async function verifyMessage(message, signature) {
+// API endpoints for consumer-facing UI
+app.post('/api/transfer-nft', authenticateToken, async (req, res) => {
     try {
-        const recoveredSigner = ethers.utils.verifyMessage(message, signature);
-        const isAdmin = await layerZeroMessagingContract.hasRole(ethers.utils.id('ADMIN_ROLE'), recoveredSigner);
-        if (!isAdmin) throw new Error('Message verification failed: unauthorized signer');
-        return isAdmin;
+        const { destChainId, to, tokenId, maxGasFee } = req.body;
+        const tx = await initiateNFTTransfer(destChainId, to, tokenId, maxGasFee);
+        res.json({ transactionHash: tx.hash });
     } catch (error) {
-        console.error(`Message verification failed: ${error.message}`);
-        return false;
+        res.status(500).json({ error: error.message });
     }
-}
+});
 
-// Start the omnichain service
-async function startService() {
-    console.log("Starting Omnichain Service for cross-chain messaging and NFT transfers...");
-    await monitorEvents();
-}
+app.post('/api/receive-message', authenticateToken, async (req, res) => {
+    try {
+        const { srcChainId, payload, signature } = req.body;
+        const tx = await lzReceive(srcChainId, payload, signature);
+        res.json({ transactionHash: tx.hash });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
-// Export functions
+// Serve static files (e.g., React frontend)
+app.use(express.static('public'));
+
+// User login endpoint (for generating JWT)
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    // Here you should verify the username and password with your user database
+    const user = await User.findOne({ username, password });
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const token = jwt.sign({ userId: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
+});
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    monitorEvents();
+});
+
+// Export functions for testing and external use
 module.exports = {
     initiateNFTTransfer,
     lzReceive,
-    verifyMessage,
-    startService,
->>>>>>> origin/main
+    rateLimitCheck,
+    retryTransaction,
+    monitorEvents,
 };

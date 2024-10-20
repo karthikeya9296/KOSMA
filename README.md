@@ -46,7 +46,39 @@ Licensing: Using the Story Protocol SDK, KOSMA allows content creators to issue 
 Royalties: With Story Protocol's royalty management API, royalties are seamlessly distributed to relevant parties whenever the licensed content is used, enhancing the transparency and fairness of royalty payments.
 
 Disputes: The dispute resolution smart contracts provided by Story Protocol are utilized to address any conflicts that arise over creative IP, giving creators and licensees a fair process to resolve disputes.
+
+
 - **Sign Protocol**: Attestations for content ownership, licensing, and user verification.
+KOSMA integrates **Sign Protocol** to create, manage, and verify attestations for IP. By using schemas, attestations, and Sign Protocol's indexing services, we ensure the integrity and security of digital content. Additionally, our platform incorporates encrypted attestations, making it suitable for managing sensitive information. The platform is built to be transparent, secure, and completely on-chain, leveraging Sign Protocol's powerful tools for attestations.
+
+## Features
+- **Attestations**: Users can create, update, revoke, and manage attestations on-chain, ensuring authenticity and transparency.
+- **Encrypted Attestations**: The project supports encrypted attestations, allowing sensitive data to be securely shared on-chain.
+- **Schema Hooks**: The project leverages **Sign Protocol's schema hooks** to extend functionality, such as whitelisting attesters and managing permissions.
+- **Role-Based Access Control**: Built-in role-based access using AccessControl from OpenZeppelin to manage attester and manager permissions.
+## Integration with Sign Protocol
+The platform integrates with the **Sign Protocol SDK** to add attestations and schema hooks as part of the core functionality:
+1. **Attestations**: Attestations are created, updated, and revoked by authorized attesters. The attestation details include content hashes and encrypted data references.
+2. **Schema Hooks**: Schema hooks are triggered during attestation creation or whitelisting to extend the protocol and provide custom logic.
+3. **Encrypted Data**: Encrypted attestation data is stored securely and can be decrypted using key-sharing mechanisms, ensuring only authorized entities can access the information.
+
+## Smart Contract
+The project uses a Solidity smart contract to manage attestations on-chain:
+- **createAttestation()**: Creates a new attestation with a content hash and encrypted data reference.
+- **batchCreateAttestations()**: Creates multiple attestations in a single transaction.
+- **updateAttestation()**: Updates an existing attestation's content.
+- **revokeAttestation()**: Revokes an attestation, effectively deleting it from the blockchain.
+- **shareDecryptionKey()**: Shares an encrypted key to authorized entities for decryption purposes.
+
+## Requirements
+- **Sign Protocol SDK**: Integrated to use attestations, schemas, and indexing.
+- **OpenZeppelin**: Used for **AccessControl** and **ReentrancyGuard** for security features.
+- **Encryption and Decryption**: Implemented using off-chain methods for sharing keys securely.
+
+
+
+
+
 - **Superfluid**: Streaming payments for subscriptions and royalty payments.
 - **Circle USDC**: Stablecoin payments.
 - **XMTP**: Secure on-chain messaging for comments and notifications.

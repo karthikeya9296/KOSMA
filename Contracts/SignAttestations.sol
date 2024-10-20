@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@signprotocol/sign-sdk.sol"; // Import Sign Protocol SDK for attestations
 
 contract SignAttestations is ReentrancyGuard, AccessControl {
     using ECDSA for bytes32;
@@ -19,8 +20,8 @@ contract SignAttestations is ReentrancyGuard, AccessControl {
     // Structure to hold attestation data
     struct Attestation {
         address owner;
-        bytes32 contentHash; // Store as bytes32 hash instead of string for gas optimization
-        bytes32 encryptedData; // Store the bytes32 hash of the encrypted data reference (IPFS URL)
+        bytes32 contentHash; // Store as bytes32 hash for gas optimization
+        bytes32 encryptedData; // Store encrypted data as bytes32 reference (e.g., IPFS URL)
         bool exists;
     }
 
@@ -28,12 +29,16 @@ contract SignAttestations is ReentrancyGuard, AccessControl {
     mapping(uint256 => Attestation) private attestations;
     uint256 private attestationCount;
 
+    // Sign Protocol schema hooks
+    bytes32 public constant SCHEMA_ID = keccak256("KOSMA-ATTESTATION-SCHEMA");
+
     // Events
     event AttestationCreated(uint256 indexed attestationId, address indexed owner, bytes32 contentHash);
     event AttestationUpdated(uint256 indexed attestationId, bytes32 newContentHash, bytes32 newEncryptedData);
     event AttestationRevoked(uint256 indexed attestationId);
     event AttestationDecrypted(uint256 indexed attestationId, address indexed requester);
     event KeyShared(uint256 attestationId, address indexed recipient, bytes encryptedKey);
+    event SchemaHookTriggered(bytes32 indexed schemaId, address attester);
 
     // Constructor
     constructor() {
@@ -59,6 +64,10 @@ contract SignAttestations is ReentrancyGuard, AccessControl {
         attestationCount++;
         attestations[attestationCount] = Attestation(msg.sender, contentHash, encryptedData, true);
         emit AttestationCreated(attestationCount, msg.sender, contentHash);
+
+        // Trigger Schema Hook using Sign Protocol SDK
+        SignProtocol.triggerSchemaHook(SCHEMA_ID, msg.sender);
+        emit SchemaHookTriggered(SCHEMA_ID, msg.sender);
     }
 
     // Batch function to create multiple attestations
@@ -68,6 +77,10 @@ contract SignAttestations is ReentrancyGuard, AccessControl {
             attestationCount++;
             attestations[attestationCount] = Attestation(msg.sender, contentHashes[i], encryptedData[i], true);
             emit AttestationCreated(attestationCount, msg.sender, contentHashes[i]);
+
+            // Trigger Schema Hook using Sign Protocol SDK
+            SignProtocol.triggerSchemaHook(SCHEMA_ID, msg.sender);
+            emit SchemaHookTriggered(SCHEMA_ID, msg.sender);
         }
     }
 
@@ -92,6 +105,15 @@ contract SignAttestations is ReentrancyGuard, AccessControl {
 
         delete attestations[attestationId];
         emit AttestationRevoked(attestationId);
+    }
+
+    // Schema hook for whitelisting attesters
+    function addAttester(address account) external onlyRole(MANAGER_ROLE) {
+        grantRole(ATTESTER_ROLE, account);
+
+        // Trigger Schema Hook using Sign Protocol SDK for whitelist
+        SignProtocol.triggerSchemaHook(SCHEMA_ID, account);
+        emit SchemaHookTriggered(SCHEMA_ID, account);
     }
 
     // Function to transfer ownership of an attestation
@@ -119,31 +141,9 @@ contract SignAttestations is ReentrancyGuard, AccessControl {
         emit KeyShared(attestationId, recipient, encryptedKey);
     }
 
-    // Function to verify user identity using signature and nonce (replay protection)
-    function verifyIdentity(address user, bytes memory signature, uint256 nonce, uint256 expiration)
-        external view returns (bool)
-    {
-        require(nonce == nonces[user], "Invalid nonce");
-        require(block.timestamp <= expiration, "Signature expired");
-
-        bytes32 messageHash = keccak256(abi.encodePacked(user, nonce, expiration));
-        address recoveredAddress = messageHash.toEthSignedMessageHash().recover(signature);
-        return recoveredAddress == user;
-    }
-
-    // Function to update a user's nonce (for replay protection)
-    function updateNonce(address user) external {
-        nonces[user]++;
-    }
-
-    // Function to add an attester role
-    function addAttester(address account) external onlyRole(MANAGER_ROLE) {
-        grantRole(ATTESTER_ROLE, account);
-    }
-
-    // Function to remove an attester role
-    function removeAttester(address account) external onlyRole(MANAGER_ROLE) {
-        revokeRole(ATTESTER_ROLE, account);
+    // Function to add an admin role (to comply with Schema Hooks)
+    function addAdmin(address account) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(ADMIN_ROLE, account);
     }
 
     // Function to get attestation details
