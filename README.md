@@ -162,70 +162,70 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 #### Flow Blockchain 
 - (Most Killer App Potential & Best Sports App)
 - Contracts:
-- [FlowNFT.sol](Contracts/LayerZeroMessaging.sol )  - Manages NFTs on Flow, using Cadence smart contracts.
+- [KosmaNFT.cdc](Contracts/KosmaNFT.cdc)  - Manages NFTs on Flow, using Cadence smart contracts.
 - Backend:
-- nftService.js - Manages Flow NFTs.
+- [nftService.js](backend/services/nftService.js) - Manages Flow NFTs.
 - Frontend:
 - Components/Pages:
-- ContentPage.js - Uses Flow to mint NFTs and interact with Flow content.
-- HomePage.js - Displays sports-related content using Flow Blockchain.
-- ProfilePage.js - Displays user-owned NFTs on Flow.
+- [ContentPage.js](frontend/src/pages/ContentPage.js) - Uses Flow to mint NFTs and interact with Flow content.
+- [HomePage.j](frontend/src/pages/HomePage.js) - Displays sports-related content using Flow Blockchain.
+- [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Displays user-owned NFTs on Flow.
 
 #### LayerZero 
 - (Most Innovative Omnichain Solution)
 - Contracts:
-- LayerZeroMessaging.sol - Handles omnichain communication using LayerZero V2.
+- [LayerZeroMessaging.sol](Contracts/LayerZeroMessaging.sol) - Handles omnichain communication using LayerZero V2.
 - Backend:
-- omnichainService.js - Provides endpoints for LayerZero cross-chain communication.
-- omnichainRoutes.js - Routes for cross-chain messaging.
+- [omnichainService.js](backend/services/omnichainService.js) - Provides endpoints for LayerZero cross-chain communication.
+- [omnichainRoutes.js](backend/routes/omnichainRoutes.js) - Routes for cross-chain messaging.
 - Frontend:
 - Components/Pages:
-- ContentPage.js - Allows cross-chain content interactions using LayerZero.
-- ProfilePage.js - Integrates with LayerZero for cross-chain NFT transfers.
+- [ContentPage.js](frontend/src/pages/ContentPage.js) - Allows cross-chain content interactions using LayerZero.
+- [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Integrates with LayerZero for cross-chain NFT transfers.
 
 #### Sign Protocol 
 - (Best Overall Application & Encrypted Attestations)
 - Contracts:
-- SignAttestations.sol - Manages attestations for content ownership, licensing, and user verification using Sign Protocol.
+- [SignAttestations.sol](Contracts/SignAttestations.sol) - Manages attestations for content ownership, licensing, and user verification using Sign Protocol.
 - Backend:
-- attestService.js - Handles attestations related to content ownership, licensing, and identity.
-- attestRoutes.js - Routes for attestation management.
+- [attestService.js](backend/services/attestService.js) - Handles attestations related to content ownership, licensing, and identity.
+- [attestRoutes.js](backend/routes/attestRoutes.js) - Routes for attestation management.
 - Frontend:
 - Components:
-- ContentCard.js - Uses Sign Protocol for verifying likes as attestations.
-- MembershipCard.js - Uses Sign Protocol to verify memberships.
+- [ContentCard.js](frontend/src/components/ContentCard.js) - Uses Sign Protocol for verifying likes as attestations.
+- [MembershipCard.js](frontend/src/components/MembershipCard.js) - Uses Sign Protocol to verify memberships.
 - ProfilePage.js - Users can manage attestations and verify their content ownership.
 
 #### Story Protocol 
 - (Best Overall Use of the Proof of Creativity Protocol & Best AI Application on Story)
 - Contracts:
-- StoryIntegration.sol - Manages content licensing, royalties, and disputes using Story Protocol.
+- [StoryIntegration.sol](Contracts/StoryIntegration.sol) - Manages content licensing, royalties, and disputes using Story Protocol.
 - Backend:
-- storyService.js - Provides endpoints to create licenses, manage royalties, and handle disputes.
-- storyRoutes.js - Routes for licensing, royalty, and dispute management.
+- [storyService.js](backend/services/storyService.js) - Provides endpoints to create licenses, manage royalties, and handle disputes.
+- [storyRoutes.js](backend/routes/storyRoutes.js) - Routes for licensing, royalty, and dispute management.
 - Frontend:
 - Components/Pages:
-- RoyaltyDashboard.js - Manages royalties using Story Protocol.
-- ContentPage.js - Enables licensing of content using Story Protocol.
-- ProfilePage.js - Manages royalties and licensing using Story Protocol.
-- AIContentGenerator.js - Allows AI-generated content registration using Story Protocol.
+- [RoyaltyDashboard.js](frontend/src/pages/RoyaltyDashboard.js) - Manages royalties using Story Protocol.
+- [ContentPage.js](frontend/src/pages/ContentPage.js) - Enables licensing of content using Story Protocol.
+- [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Manages royalties and licensing using Story Protocol.
+- [AIContentGenerator.js](frontend/src/components/AIContentGenerator.js) - Allows AI-generated content registration using Story Protocol.
 
 #### Circle 
 - (USDC Integration Prize & Cross-Chain Transfers)
 - Contracts:
-- KosmaPayments.sol - Manages payments using Circle USDC, including cross-chain transfers using Circle's CCTP.
+- [KosmaPayments.sol](Contracts/KosmaPayments.sol) - Manages payments using Circle USDC, including cross-chain transfers using Circle's CCTP.
 - Backend:
-- paymentService.js - Manages USDC payments, conversions, and streaming payments using Superfluid.
-- paymentRoutes.js - Routes for handling Circle USDC payments.
+- [paymentService.js](backend/services/paymentService.js) - Manages USDC payments, conversions, and streaming payments using Superfluid.
+- [paymentRoutes.js](backend/routes/paymentRoutes.js) - Routes for handling Circle USDC payments.
 - Frontend:
 - Components:
-- PaymentForm.js - Allows users to make payments using Circle USDC.
-- HomePage.js - Allows content monetization using Circle USDC for tipping.
+- [PaymentForm.js](frontend/src/components/PaymentForm.js) - Allows users to make payments using Circle USDC.
+- [HomePage.js](frontend/src/pages/HomePage.js) - Allows content monetization using Circle USDC for tipping.
 
 #### Ledger 
 - (Best Use of Ledger Technology)
 - Frontend:
 - Components:
-- LedgerConnect.js - Integrates Ledger hardware wallet for secure transactions.
-- Navbar.js - Allows users to connect their Ledger wallet for secure interactions.
-- ProfilePage.js - Provides an easy interface for Ledger wallet integration and managing NFTs securely.
+- [LedgerConnect.js](frontend/src/components/LedgerConnect.js) - Integrates Ledger hardware wallet for secure transactions.
+- [Navbar.js](frontend/src/components/navbar.js) - Allows users to connect their Ledger wallet for secure interactions.
+- [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Provides an easy interface for Ledger wallet integration and managing NFTs securely.
