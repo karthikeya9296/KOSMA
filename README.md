@@ -153,7 +153,24 @@ Kosma is licensed under the MIT License. See the [LICENSE](LICENSE) file for mor
 
 ## Contact
 
-For any inquiries or feedback, please reach out to us at [contact@kosma.com](mailto:contact@kosma.com).
+For any inquiries or feedback, please reach out to us at [gummadikarthikeya3@gmail.com](mailto:gummadikarthikeya3@gmail.com).
+
+KOSMA team Social Handles.
+
+[Karthikeya Gummadi](https://www.linkedin.com/in/karthikeya9296/) - linkdIn
+- [gummadikarthikeya3@gmail.com](mailto:gummadikarthikeya3@gmail.com)
+
+[Sannith Reddy Gunreddy](https://www.linkedin.com/in/sannith-reddy/)  - linkdIn
+- [sannithgunreddy@gmail.com](mailto:sannithgunreddy@gmail.com)
+
+[Sai Shreya Suryavamshi](https://www.linkedin.com/in/suryavamshi-sai-shreya-b760801bb/)   - linkdIn
+- [suryavamshisaishreya3007@gmail.com](mailto:suryavamshisaishreya3007@gmail.com)
+
+[Srinith Rao Bichinepally](https://www.linkedin.com/in/srinith-ab0848241/)  - linkdIn
+- [srinithraobichinepally14141@gmail.com](mailto:srinithraobichinepally14141@gmail.com)
+
+[Aravind Sai Srinivas Boddeti](https://www.linkedin.com/in/aravind007) - linkdIn
+- [aravindsai1050@gmail.com](mailto:aravindsai1050@gmail.com)
 
 ---
 
@@ -170,6 +187,10 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 - [ContentPage.js](frontend/src/pages/ContentPage.js) - Uses Flow to mint NFTs and interact with Flow content.
 - [HomePage.j](frontend/src/pages/HomePage.js) - Displays sports-related content using Flow Blockchain.
 - [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Displays user-owned NFTs on Flow.
+- [Demo](https://drive.google.com/file/d/1wDwe8xneUsPF1jXXFNhB0oVUfBRcyNmJ/view?usp=sharing)
+![Image 1](Content/flow image 1.jpeg)
+![Image 1](Content/flow image 2.jpeg)
+![Image 1](Content/flow image 3.jpeg)
 
 #### LayerZero 
 - (Most Innovative Omnichain Solution)
@@ -182,6 +203,7 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 - Components/Pages:
 - [ContentPage.js](frontend/src/pages/ContentPage.js) - Allows cross-chain content interactions using LayerZero.
 - [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Integrates with LayerZero for cross-chain NFT transfers.
+- [Demo](https://drive.google.com/file/d/1c4LKV0fKxETour6R0XrHC5gVxEz21E1S/view?usp=sharing)
 
 #### Sign Protocol 
 - (Best Overall Application & Encrypted Attestations)
@@ -195,6 +217,7 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 - [ContentCard.js](frontend/src/components/ContentCard.js) - Uses Sign Protocol for verifying likes as attestations.
 - [MembershipCard.js](frontend/src/components/MembershipCard.js) - Uses Sign Protocol to verify memberships.
 - ProfilePage.js - Users can manage attestations and verify their content ownership.
+- [Demo](https://drive.google.com/file/d/1qVrRaLwt8WEMWC0Utqqrv_UY3V2_ZAoT/view?usp=sharing)
 
 #### Story Protocol 
 - (Best Overall Use of the Proof of Creativity Protocol & Best AI Application on Story)
@@ -209,6 +232,7 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 - [ContentPage.js](frontend/src/pages/ContentPage.js) - Enables licensing of content using Story Protocol.
 - [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Manages royalties and licensing using Story Protocol.
 - [AIContentGenerator.js](frontend/src/components/AIContentGenerator.js) - Allows AI-generated content registration using Story Protocol.
+- [Demo](https://drive.google.com/file/d/1ZWcKYeUsdNnVV6Em5khipbTsMfYEOW_H/view?usp=sharing)
 
 #### Circle 
 - (USDC Integration Prize & Cross-Chain Transfers)
@@ -221,6 +245,7 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 - Components:
 - [PaymentForm.js](frontend/src/components/PaymentForm.js) - Allows users to make payments using Circle USDC.
 - [HomePage.js](frontend/src/pages/HomePage.js) - Allows content monetization using Circle USDC for tipping.
+- [Demo](https://drive.google.com/file/d/1t4GqRY3-3yVbpK3pq6DgZNQPKCt0okXT/view?usp=sharing)
 
 #### Ledger 
 - (Best Use of Ledger Technology)
@@ -229,3 +254,4 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 - [LedgerConnect.js](frontend/src/components/LedgerConnect.js) - Integrates Ledger hardware wallet for secure transactions.
 - [Navbar.js](frontend/src/components/navbar.js) - Allows users to connect their Ledger wallet for secure interactions.
 - [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Provides an easy interface for Ledger wallet integration and managing NFTs securely.
+- [Demo](https://drive.google.com/file/d/13vDAMm-qyPVFtT0oieoIvcbRey-qeU3D/view?usp=sharing)
