@@ -31,7 +31,7 @@ Kosma aims to disrupt the current social media landscape by prioritizing user pr
 - **Story Protocol**: Content licensing, royalty, and dispute management. Integrates with Story Protocol SDK for issuing licenses, managing royalties, and handling disputes.
 - **Sign Protocol**: Attestations for content ownership, licensing, and user verification. Integrates with the Sign Protocol SDK to create, manage, and verify attestations for IP.
 - **Superfluid**: Streaming payments for subscriptions and royalty payments.
-- - **Circle USDC**: Stablecoin payments and cross-chain transfers using Circle's CCTP. [Learn more](#circle-usdc-integration).
+- **[Circle USDC](#circle-usdc-integration)**: Stablecoin payments and cross-chain transfers using Circle's CCTP.
 - **LedgerJS**: Integration for secure wallet connections and user authentication with Ledger hardware wallets.
 - **XMTP**: Secure on-chain messaging for comments and notifications.
 - **Unlock Protocol**: Membership management for premium content.
