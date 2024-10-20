@@ -159,7 +159,8 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 
 ### Additional ReadMe Files for Integrated Tools
 
-#### Flow Blockchain #### (Most Killer App Potential & Best Sports App)
+#### Flow Blockchain 
+(Most Killer App Potential & Best Sports App)
 Contracts:
 FlowNFT.sol  - Manages NFTs on Flow, using Cadence smart contracts.
 Backend:
@@ -170,7 +171,8 @@ ContentPage.js - Uses Flow to mint NFTs and interact with Flow content.
 HomePage.js - Displays sports-related content using Flow Blockchain.
 ProfilePage.js - Displays user-owned NFTs on Flow.
 
-#### LayerZero (Most Innovative Omnichain Solution)
+#### LayerZero 
+(Most Innovative Omnichain Solution)
 Contracts:
 LayerZeroMessaging.sol - Handles omnichain communication using LayerZero V2.
 Backend:
@@ -181,7 +183,8 @@ Components/Pages:
 ContentPage.js - Allows cross-chain content interactions using LayerZero.
 ProfilePage.js - Integrates with LayerZero for cross-chain NFT transfers.
 
-#### Sign Protocol (Best Overall Application & Encrypted Attestations)
+#### Sign Protocol 
+(Best Overall Application & Encrypted Attestations)
 Contracts:
 SignAttestations.sol - Manages attestations for content ownership, licensing, and user verification using Sign Protocol.
 Backend:
@@ -193,7 +196,8 @@ ContentCard.js - Uses Sign Protocol for verifying likes as attestations.
 MembershipCard.js - Uses Sign Protocol to verify memberships.
 ProfilePage.js - Users can manage attestations and verify their content ownership.
 
-#### Story Protocol (Best Overall Use of the Proof of Creativity Protocol & Best AI Application on Story)
+#### Story Protocol 
+(Best Overall Use of the Proof of Creativity Protocol & Best AI Application on Story)
 Contracts:
 StoryIntegration.sol - Manages content licensing, royalties, and disputes using Story Protocol.
 Backend:
@@ -206,7 +210,8 @@ ContentPage.js - Enables licensing of content using Story Protocol.
 ProfilePage.js - Manages royalties and licensing using Story Protocol.
 AIContentGenerator.js - Allows AI-generated content registration using Story Protocol.
 
-#### Circle (USDC Integration Prize & Cross-Chain Transfers)
+#### Circle 
+(USDC Integration Prize & Cross-Chain Transfers)
 Contracts:
 KosmaPayments.sol - Manages payments using Circle USDC, including cross-chain transfers using Circle's CCTP.
 Backend:
@@ -217,7 +222,8 @@ Components:
 PaymentForm.js - Allows users to make payments using Circle USDC.
 HomePage.js - Allows content monetization using Circle USDC for tipping.
 
-#### Ledger (Best Use of Ledger Technology)
+#### Ledger 
+(Best Use of Ledger Technology)
 Frontend:
 Components:
 LedgerConnect.js - Integrates Ledger hardware wallet for secure transactions.
