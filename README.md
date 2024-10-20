@@ -24,7 +24,8 @@ Kosma aims to disrupt the current social media landscape by prioritizing user pr
 ## Technologies Used
 
 - **Solidity**: Smart contract development for NFT minting, payments, attestations, etc.
-- **Flow Blockchain**: Integration with Flow
+- **Flow Blockchain**: (#Integration with Flow)(/Users/karthik/KOSMA/README.md
+/Users/karthik/KOSMA/Contracts/KosmaNFT.cdc)
 
 Kosma utilizes Flow blockchain's native smart contract language, Cadence, to manage NFTs representing user-generated content. This integration leverages Flow’s account abstraction and resource-oriented model to ensure scalability and user-friendly experiences. Flow is used to:
 
@@ -35,7 +36,16 @@ Enable secure content minting as NFTs.
 Prevent unauthorized content capture through layered protections.
 
 - **LayerZero V2**: Cross-chain messaging and NFT interactions.
-- **Story Protocol**: Content licensing, royalty, and dispute management.
+- **Story Protocol**: Content licensing, royalty, and dispute management.(add hyperlink for /Users/karthik/KOSMA/backend/services/storyService.js )
+Integration with Story Protocol
+
+KOSMA leverages Story Protocol's powerful blockchain tools to provide a comprehensive solution for creative content management. The integration is as follows:
+
+Licensing: Using the Story Protocol SDK, KOSMA allows content creators to issue licenses to others for using their IP, ensuring transparent and programmable licensing agreements.
+
+Royalties: With Story Protocol's royalty management API, royalties are seamlessly distributed to relevant parties whenever the licensed content is used, enhancing the transparency and fairness of royalty payments.
+
+Disputes: The dispute resolution smart contracts provided by Story Protocol are utilized to address any conflicts that arise over creative IP, giving creators and licensees a fair process to resolve disputes.
 - **Sign Protocol**: Attestations for content ownership, licensing, and user verification.
 - **Superfluid**: Streaming payments for subscriptions and royalty payments.
 - **Circle USDC**: Stablecoin payments.
