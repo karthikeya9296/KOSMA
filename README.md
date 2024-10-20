@@ -162,7 +162,7 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 #### Flow Blockchain 
 - (Most Killer App Potential & Best Sports App)
 - Contracts:
-- [FlowNFT.sol](#Contracts/LayerZeroMessaging.sol )  - Manages NFTs on Flow, using Cadence smart contracts.
+- [FlowNFT.sol](Contracts/LayerZeroMessaging.sol )  - Manages NFTs on Flow, using Cadence smart contracts.
 - Backend:
 - nftService.js - Manages Flow NFTs.
 - Frontend:
