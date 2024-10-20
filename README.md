@@ -159,7 +159,7 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 
 ### Additional ReadMe Files for Integrated Tools
 
-#### 1. Circle USDC Integration
+#### Circle USDC Integration
 
 Kosma leverages **Circle's USDC** for secure, fast, and decentralized payments. USDC is used for tipping creators, purchasing content, and streaming payments. Additionally, Circle's Cross-Chain Transfer Protocol (CCTP) enables seamless cross-chain payments, enhancing liquidity and usability.
 
