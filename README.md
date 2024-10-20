@@ -157,19 +157,19 @@ For any inquiries or feedback, please reach out to us at [gummadikarthikeya3@gma
 
 KOSMA team Social Handles.
 
-[Karthikeya Gummadi](https://www.linkedin.com/in/karthikeya9296/) - linkdIn
+[Karthikeya Gummadi](https://www.linkedin.com/in/karthikeya9296/) - linkedIn
 - [gummadikarthikeya3@gmail.com](mailto:gummadikarthikeya3@gmail.com)
 
-[Sannith Reddy Gunreddy](https://www.linkedin.com/in/sannith-reddy/)  - linkdIn
+[Sannith Reddy Gunreddy](https://www.linkedin.com/in/sannith-reddy/)  - linkedIn
 - [sannithgunreddy@gmail.com](mailto:sannithgunreddy@gmail.com)
 
-[Sai Shreya Suryavamshi](https://www.linkedin.com/in/suryavamshi-sai-shreya-b760801bb/)   - linkdIn
+[Sai Shreya Suryavamshi](https://www.linkedin.com/in/suryavamshi-sai-shreya-b760801bb/)   - linkedIn
 - [suryavamshisaishreya3007@gmail.com](mailto:suryavamshisaishreya3007@gmail.com)
 
-[Srinith Rao Bichinepally](https://www.linkedin.com/in/srinith-ab0848241/)  - linkdIn
+[Srinith Rao Bichinepally](https://www.linkedin.com/in/srinith-ab0848241/)  - linkedIn
 - [srinithraobichinepally14141@gmail.com](mailto:srinithraobichinepally14141@gmail.com)
 
-[Aravind Sai Srinivas Boddeti](https://www.linkedin.com/in/aravind007) - linkdIn
+[Aravind Sai Srinivas Boddeti](https://www.linkedin.com/in/aravind007) - linkedIn
 - [aravindsai1050@gmail.com](mailto:aravindsai1050@gmail.com)
 
 ---
