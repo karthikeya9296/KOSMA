@@ -26,13 +26,13 @@ Kosma aims to disrupt the current social media landscape by prioritizing user pr
 ## Technologies Used
 
 - **Solidity**: Smart contract development for NFT minting, payments, attestations, etc.
-- **Flow Blockchain**: Kosma utilizes Flow blockchain's native smart contract language, Cadence, to manage NFTs representing user-generated content. Flow is used to manage user privacy settings, enable secure content minting, and prevent unauthorized content capture.
-- **LayerZero V2**: Cross-chain messaging and NFT interactions.
-- **Story Protocol**: Content licensing, royalty, and dispute management. Integrates with Story Protocol SDK for issuing licenses, managing royalties, and handling disputes.
-- **Sign Protocol**: Attestations for content ownership, licensing, and user verification. Integrates with the Sign Protocol SDK to create, manage, and verify attestations for IP.
+- **[Flow Blockchain](#Flow-Blockchain)**: Kosma utilizes Flow blockchain's native smart contract language, Cadence, to manage NFTs representing user-generated content. Flow is used to manage user privacy settings, enable secure content minting, and prevent unauthorized content capture.
+- **[LayerZero V2](#layerzero)**: Cross-chain messaging and NFT interactions.
+- **[Story Protocol](#Sign-Protocol)**: Content licensing, royalty, and dispute management. Integrates with Story Protocol SDK for issuing licenses, managing royalties, and handling disputes.
+- **[Sign Protocol](#Sign-Protocol)**: Attestations for content ownership, licensing, and user verification. Integrates with the Sign Protocol SDK to create, manage, and verify attestations for IP.
 - **Superfluid**: Streaming payments for subscriptions and royalty payments.
-- **[Circle USDC](#circle-usdc-integration)**: Stablecoin payments and cross-chain transfers using Circle's CCTP.
-- **LedgerJS**: Integration for secure wallet connections and user authentication with Ledger hardware wallets.
+- **[Circle USDC](#Circle)**: Stablecoin payments and cross-chain transfers using Circle's CCTP.
+- **[LedgerJS](#ledger)**: Integration for secure wallet connections and user authentication with Ledger hardware wallets.
 - **XMTP**: Secure on-chain messaging for comments and notifications.
 - **Unlock Protocol**: Membership management for premium content.
 - **React.js**: Frontend UI components.
@@ -159,31 +159,67 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 
 ### Additional ReadMe Files for Integrated Tools
 
-#### Circle USDC Integration
+#### Flow Blockchain (Most Killer App Potential & Best Sports App)
+Contracts:
+FlowNFT.sol  - Manages NFTs on Flow, using Cadence smart contracts.
+Backend:
+nftService.js - Manages Flow NFTs.
+Frontend:
+Components/Pages:
+ContentPage.js - Uses Flow to mint NFTs and interact with Flow content.
+HomePage.js - Displays sports-related content using Flow Blockchain.
+ProfilePage.js - Displays user-owned NFTs on Flow.
 
-Kosma leverages **Circle's USDC** for secure, fast, and decentralized payments. USDC is used for tipping creators, purchasing content, and streaming payments. Additionally, Circle's Cross-Chain Transfer Protocol (CCTP) enables seamless cross-chain payments, enhancing liquidity and usability.
+#### LayerZero (Most Innovative Omnichain Solution)
+Contracts:
+LayerZeroMessaging.sol - Handles omnichain communication using LayerZero V2.
+Backend:
+omnichainService.js - Provides endpoints for LayerZero cross-chain communication.
+omnichainRoutes.js - Routes for cross-chain messaging.
+Frontend:
+Components/Pages:
+ContentPage.js - Allows cross-chain content interactions using LayerZero.
+ProfilePage.js - Integrates with LayerZero for cross-chain NFT transfers.
 
-- **Dependencies**: Install Circle SDK using `npm install @circle/api-sdk`.
-- **Usage**: Payments are initiated through Circle's APIs, allowing stable, real-time financial interactions without traditional banking limitations.
+#### Sign Protocol (Best Overall Application & Encrypted Attestations)
+Contracts:
+SignAttestations.sol - Manages attestations for content ownership, licensing, and user verification using Sign Protocol.
+Backend:
+attestService.js - Handles attestations related to content ownership, licensing, and identity.
+attestRoutes.js - Routes for attestation management.
+Frontend:
+Components:
+ContentCard.js - Uses Sign Protocol for verifying likes as attestations.
+MembershipCard.js - Uses Sign Protocol to verify memberships.
+ProfilePage.js - Users can manage attestations and verify their content ownership.
 
-#### 2. Ledger Integration
+#### Story Protocol (Best Overall Use of the Proof of Creativity Protocol & Best AI Application on Story)
+Contracts:
+StoryIntegration.sol - Manages content licensing, royalties, and disputes using Story Protocol.
+Backend:
+storyService.js - Provides endpoints to create licenses, manage royalties, and handle disputes.
+storyRoutes.js - Routes for licensing, royalty, and dispute management.
+Frontend:
+Components/Pages:
+RoyaltyDashboard.js - Manages royalties using Story Protocol.
+ContentPage.js - Enables licensing of content using Story Protocol.
+ProfilePage.js - Manages royalties and licensing using Story Protocol.
+AIContentGenerator.js - Allows AI-generated content registration using Story Protocol.
 
-Kosma integrates **Ledger** for secure wallet connections. Users can connect their Ledger hardware wallet to the Kosma platform to authenticate, sign transactions, and manage assets.
+#### Circle (USDC Integration Prize & Cross-Chain Transfers)
+Contracts:
+KosmaPayments.sol - Manages payments using Circle USDC, including cross-chain transfers using Circle's CCTP.
+Backend:
+paymentService.js - Manages USDC payments, conversions, and streaming payments using Superfluid.
+paymentRoutes.js - Routes for handling Circle USDC payments.
+Frontend:
+Components:
+PaymentForm.js - Allows users to make payments using Circle USDC.
+HomePage.js - Allows content monetization using Circle USDC for tipping.
 
-- **Dependencies**: Install LedgerJS using `npm install @ledgerhq/hw-app-eth @ledgerhq/hw-transport-webusb`.
-- **Usage**: LedgerConnect.js facilitates user authentication and transaction signing, ensuring the highest level of security.
-
-#### 3. Story Protocol Integration
-
-Kosma uses **Story Protocol** for licensing content, managing royalties, and resolving disputes.
-
-- **Dependencies**: Install Story Protocol SDK using `npm install @story-protocol/sdk`.
-- **Usage**: Content creators can license their content on-chain, ensuring transparency and fair revenue distribution.
-
-#### 4. Sign Protocol Integration
-
-Kosma utilizes **Sign Protocol** for attestation creation, schema management, and user verification.
-
-- **Dependencies**: Install Sign Protocol SDK using `npm install @sign-protocol/sdk`.
-- **Usage**: Attestations are created to verify ownership and license content, leveraging schema hooks for advanced logic.
-
+#### Ledger (Best Use of Ledger Technology)
+Frontend:
+Components:
+LedgerConnect.js - Integrates Ledger hardware wallet for secure transactions.
+Navbar.js - Allows users to connect their Ledger wallet for secure interactions.
+ProfilePage.js - Provides an easy interface for Ledger wallet integration and managing NFTs securely.
