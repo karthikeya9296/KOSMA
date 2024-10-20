@@ -5,16 +5,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "layerzero/contracts/LayerZeroEndpoint.sol";
 import "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
+// Import Circle's CCTP interface
+import "circle/contracts/CrossChainTransferProtocol.sol";
 
 contract KosmaPayments is Ownable, ReentrancyGuard {
     using Counters for Counters.Counter;
     IERC20 public immutable usdcToken; // Circle USDC token
     ISuperfluid private immutable superfluidHost; // Superfluid host contract
     IConstantFlowAgreementV1 private immutable cfa; // Superfluid Constant Flow Agreement
-    LayerZeroEndpoint public immutable layerZeroEndpoint; // LayerZero endpoint for cross-chain payments
+    CrossChainTransferProtocol public immutable cctp; // Circle CCTP contract interface
 
     Counters.Counter private transactionIdCounter;
 
@@ -37,12 +38,12 @@ contract KosmaPayments is Ownable, ReentrancyGuard {
         address _usdcTokenAddress,
         address _superfluidHost,
         address _cfa,
-        address _layerZeroEndpointAddress
+        address _cctpAddress
     ) {
         usdcToken = IERC20(_usdcTokenAddress);
         superfluidHost = ISuperfluid(_superfluidHost);
         cfa = IConstantFlowAgreementV1(_cfa);
-        layerZeroEndpoint = LayerZeroEndpoint(_layerZeroEndpointAddress);
+        cctp = CrossChainTransferProtocol(_cctpAddress);
     }
 
     modifier onlySender(uint256 transactionId) {
@@ -141,7 +142,7 @@ contract KosmaPayments is Ownable, ReentrancyGuard {
         emit StreamStopped(msg.sender, receiver);
     }
 
-    // 3. Cross-Chain Payment Protocol
+    // 3. Cross-Chain Payment Using Circle CCTP
     function crossChainPayment(
         address receiver,
         uint256 amount,
@@ -149,8 +150,9 @@ contract KosmaPayments is Ownable, ReentrancyGuard {
     ) external nonReentrant {
         require(usdcToken.transferFrom(msg.sender, address(this), amount), "Transfer failed");
 
-        // Use LayerZero to send payment to the receiver on another chain
-        layerZeroEndpoint.send(destinationChain, msg.sender, receiver, amount);
+        // Use Circle's CCTP to initiate cross-chain transfer
+        // Assuming the CCTP contract has a `send` function
+        cctp.send(receiver, amount, destinationChain);
 
         emit CrossChainPayment(msg.sender, receiver, amount, destinationChain);
     }

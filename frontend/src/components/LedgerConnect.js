@@ -4,6 +4,7 @@ import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ledger from '@ledgerhq/hw-app-eth';
 import { setWalletConnected, setWalletDisconnected } from '../redux/actions/walletActions'; 
 import { useNotifications } from '../hooks/useNotifications'; // Custom hook for notifications
+import axios from 'axios'; // Axios for making backend requests
 
 const LedgerConnect = () => {
   const [ledgerConnected, setLedgerConnected] = useState(false);
@@ -76,6 +77,48 @@ const LedgerConnect = () => {
     notifySuccess('Ledger wallet disconnected.');
   };
 
+  // Function to sign in with Ledger
+  const signInWithLedger = async () => {
+    try {
+      if (!ledgerConnected) {
+        setErrorMessage('Please connect your Ledger wallet first.');
+        return;
+      }
+
+      setLoading(true);
+      notifyInfo('Generating unique signature for login...');
+
+      // Generate a unique message to sign (nonce)
+      const nonce = `Sign this message to authenticate with KOSMA at ${new Date().toISOString()}`;
+      
+      const transport = await TransportWebUSB.create();
+      const ledger = new Ledger(transport);
+
+      // Sign the nonce with Ledger
+      const result = await ledger.signPersonalMessage("44'/60'/0'/0/0", Buffer.from(nonce).toString('hex'));
+      const signature = `0x${result.r}${result.s}${result.v}`;
+
+      // Send the signed message to backend for verification
+      const response = await axios.post('/api/auth/verify-signature', {
+        address: walletAddress,
+        signature,
+        nonce
+      });
+
+      if (response.data.success) {
+        notifySuccess('Successfully signed in with Ledger!');
+      } else {
+        throw new Error('Signature verification failed.');
+      }
+    } catch (error) {
+      setErrorMessage('Failed to sign in with Ledger. Please try again.');
+      notifyError('Error signing in with Ledger.');
+      console.error('Error signing in with Ledger:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Reconnect the Ledger wallet automatically if previously connected
   useEffect(() => {
     reconnectLedgerWallet();
@@ -109,6 +152,13 @@ const LedgerConnect = () => {
               disabled={loading}
             >
               {loading ? 'Disconnecting...' : 'Disconnect Wallet'}
+            </button>
+            <button
+              className="btn btn-success"
+              onClick={signInWithLedger}
+              disabled={loading}
+            >
+              {loading ? 'Signing in...' : 'Sign In with Ledger'}
             </button>
           </div>
         ) : (
