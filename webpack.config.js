@@ -54,6 +54,16 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.jsx'], // Resolve these file types automatically
+    fallback: {
+      "fs": false,
+      "path": require.resolve("path-browserify"),
+      "crypto": require.resolve("crypto-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "zlib": require.resolve("browserify-zlib"),
+      "http": require.resolve("stream-http"),
+      "url": require.resolve("url"),
+      "net": false
+    }
   },
   devServer: {
     static: path.join(__dirname, 'public'), // Serve static files from the 'public' folder

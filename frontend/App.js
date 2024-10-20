@@ -2,12 +2,12 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './redux/store'; // Redux store configuration
-import HomePage from './pages/HomePage'; // Home page component
-import ContentPage from './pages/ContentPage'; // Content page component
-import ProfilePage from './pages/ProfilePage'; // Profile page component
-import MembershipPage from './pages/MembershipPage'; // Membership page component
+import HomePage from './src/pages/HomePage'; // Home page component
+import ContentPage from './src/pages/ContentPage'; // Content page component
+import ProfilePage from './src/pages/ProfilePage'; // Profile page component
+import MembershipPage from './src/pages/MembershipPage'; // Membership page component
 import LoginPage from './pages/LoginPage'; // Login page component
-import Notifications from './components/Notification'; // Notification component
+import Notifications from './src/components/Notification'; // Notification component
 import PrivateRoute from './components/PrivateRoute'; // PrivateRoute component for protected routes
 import { checkUserSession } from './redux/actions/authActions'; // Action to check user session
 import './App.css'; // Styles for the application
