@@ -24,7 +24,16 @@ Kosma aims to disrupt the current social media landscape by prioritizing user pr
 ## Technologies Used
 
 - **Solidity**: Smart contract development for NFT minting, payments, attestations, etc.
-- **Flow Blockchain**: Efficient NFT management and cross-chain compatibility.
+- **Flow Blockchain**: Integration with Flow
+
+Kosma utilizes Flow blockchain's native smart contract language, Cadence, to manage NFTs representing user-generated content. This integration leverages Flow’s account abstraction and resource-oriented model to ensure scalability and user-friendly experiences. Flow is used to:
+
+Manage user privacy settings.
+
+Enable secure content minting as NFTs.
+
+Prevent unauthorized content capture through layered protections.
+
 - **LayerZero V2**: Cross-chain messaging and NFT interactions.
 - **Story Protocol**: Content licensing, royalty, and dispute management.
 - **Sign Protocol**: Attestations for content ownership, licensing, and user verification.
