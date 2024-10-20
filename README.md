@@ -177,7 +177,7 @@ KOSMA team Social Handles.
 ### Additional ReadMe Files for Integrated Tools
 
 #### Flow Blockchain 
-- (Most Killer App Potential & Best Sports App)
+- (Most Killer App Potential)
 - Contracts:
 - [KosmaNFT.cdc](Contracts/KosmaNFT.cdc)  - Manages NFTs on Flow, using Cadence smart contracts.
 - Backend:
@@ -188,9 +188,9 @@ KOSMA team Social Handles.
 - [HomePage.j](frontend/src/pages/HomePage.js) - Displays sports-related content using Flow Blockchain.
 - [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Displays user-owned NFTs on Flow.
 - [Demo](https://drive.google.com/file/d/1wDwe8xneUsPF1jXXFNhB0oVUfBRcyNmJ/view?usp=sharing)
-![Image 1](Content/flow image 1.jpeg)
-![Image 1](Content/flow image 2.jpeg)
-![Image 1](Content/flow image 3.jpeg)
+- ![Image 1](https://github.com/karthikeya9296/KOSMA/blob/2796fde7f208ae5e0231226873a89c9b07a0f128/Content/flow%20image%201.jpeg)
+- ![Image 1](https://github.com/karthikeya9296/KOSMA/blob/2796fde7f208ae5e0231226873a89c9b07a0f128/Content/flow%20image%202.jpeg)
+- ![Image 1](https://github.com/karthikeya9296/KOSMA/blob/2796fde7f208ae5e0231226873a89c9b07a0f128/Content/flow%20image%203.jpeg)
 
 #### LayerZero 
 - (Most Innovative Omnichain Solution)
