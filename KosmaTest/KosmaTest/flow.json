@@ -1,0 +1,35 @@
+{
+    "contracts": {
+        "KosmaNFT": {
+            "source": "/Users/karthik/KOSMA/Contracts/KosmaNFT.cdc",
+            "aliases": {
+                "emulator": "0xf8d6e0586b0a20c7"
+            }
+        }
+    },
+    "networks": {
+        "emulator": {
+            "host": "127.0.0.1:3569"
+        },
+        "testnet": {
+            "host": "access.testnet.nodes.onflow.org:9000"
+        },
+        "mainnet": {
+            "host": "access.mainnet.nodes.onflow.org:9000"
+        }
+    },
+    "accounts": {
+        "emulator-account": {
+            "address": "f8d6e0586b0a20c7",
+            "key": {
+                "type": "file",
+                "location": "./emulator-account.pkey"
+            }
+        }
+    },
+    "deployments": {
+        "emulator": {
+            "emulator-account": ["KosmaNFT"]
+        }
+    }
+}

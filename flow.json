@@ -1,0 +1,37 @@
+{
+    "accounts": {
+        "emulator-account": {
+            "address": "0xf8d6e0586b0a20c7",
+            "key": "5f4b0f7bac929d5a6d00615742e7377931ebb006724e4ed3c97501b0bf1d3975"
+        },
+        "testnet-account": {
+            "address": "0xfe83bd73214409bb",
+            "key": "5f4b0f7bac929d5a6d00615742e7377931ebb006724e4ed3c97501b0bf1d3975"
+        }
+    },
+    "contracts": {
+        "KosmaNFT": {
+            "source": "./KosmaNFT.cdc",
+            "aliases": {
+                "emulator": "0xf8d6e0586b0a20c7",
+                "testnet": "0xfe83bd73214409bb"
+            }
+        }
+    },
+    "networks": {
+        "emulator": {
+            "host": "127.0.0.1:3569"
+        },
+        "testnet": {
+            "host": "access.testnet.nodes.onflow.org:9000"
+        }
+    },
+    "deployments": {
+        "emulator": {
+            "emulator-account": ["KosmaNFT"]
+        },
+        "testnet": {
+            "testnet-account": ["KosmaNFT"]
+        }
+    }
+}

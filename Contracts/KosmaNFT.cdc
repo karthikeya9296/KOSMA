@@ -1,91 +1,167 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+import NonFungibleToken from 0xf8d6e0586b0a20c7
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+pub contract KosmaNFT {
 
-contract FlowNFT is ERC721URIStorage, Ownable {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+    // Struct to track privacy settings for user profiles
+    pub struct PrivacySettings {
+        pub let isWhitelisted: Bool
 
-    struct RoyaltyInfo {
-        address creator;
-        uint256 royaltyPercentage; // royalty percentage in basis points (100 = 1%)
+        init(isWhitelisted: Bool) {
+            self.isWhitelisted = isWhitelisted
+        }
     }
 
-    // Mapping from token ID to royalty information
-    mapping(uint256 => RoyaltyInfo) public royaltyInfo;
+    // Resource that represents a User Profile
+    pub resource Profile {
+        pub let id: Address
+        pub var privacySettings: PrivacySettings
 
-    // Event emitted when a new NFT is minted
-    event NFTMinted(uint256 tokenId, address owner, string tokenURI);
-
-    // Event emitted when royalties are paid
-    event RoyaltiesPaid(address creator, uint256 amount);
-
-    constructor() ERC721("KosmaFlowNFT", "KOSMA") {}
-
-    // Function to mint a new NFT
-    function mintNFT(address recipient, string memory tokenURI, uint256 royaltyPercentage) public onlyOwner returns (uint256) {
-        require(royaltyPercentage <= 10000, "Royalty percentage too high"); // max 100% (in basis points)
-
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-        
-        // Mint the NFT
-        _mint(recipient, newItemId);
-        _setTokenURI(newItemId, tokenURI);
-
-        // Set royalty info
-        royaltyInfo[newItemId] = RoyaltyInfo({
-            creator: recipient,
-            royaltyPercentage: royaltyPercentage
-        });
-
-        emit NFTMinted(newItemId, recipient, tokenURI);
-        return newItemId;
-    }
-
-    // Function to transfer NFT and handle royalty payment
-    function transferNFT(address from, address to, uint256 tokenId) public {
-        require(_isApprovedOrOwner(msg.sender, tokenId), "Caller is not owner nor approved");
-
-        // Get royalty information
-        RoyaltyInfo memory royalty = royaltyInfo[tokenId];
-
-        if (royalty.royaltyPercentage > 0) {
-            uint256 salePrice = msg.value; // Assuming transfer happens with some payment
-            uint256 royaltyAmount = (salePrice * royalty.royaltyPercentage) / 10000;
-            
-            // Pay royalty to the creator
-            payable(royalty.creator).transfer(royaltyAmount);
-            emit RoyaltiesPaid(royalty.creator, royaltyAmount);
+        init(id: Address) {
+            self.id = id
+            self.privacySettings = PrivacySettings(isWhitelisted: false)
         }
 
-        // Transfer the NFT
-        _transfer(from, to, tokenId);
+        // Update privacy settings to whitelist a user
+        pub fun updatePrivacy(isWhitelisted: Bool) {
+            self.privacySettings = PrivacySettings(isWhitelisted: isWhitelisted)
+        }
     }
 
-    // Function to update metadata of an NFT (if needed)
-    function updateMetadata(uint256 tokenId, string memory newTokenURI) public {
-        require(_isApprovedOrOwner(msg.sender, tokenId), "Caller is not owner nor approved");
-        _setTokenURI(tokenId, newTokenURI);
+    // Admin resource to manage user connections
+    pub resource Admin {
+        pub var whitelistedAccounts: {Address: Bool}
+
+        init() {
+            self.whitelistedAccounts = {}
+        }
+
+        // Add an address to the whitelist
+        pub fun addToWhitelist(account: Address) {
+            self.whitelistedAccounts[account] = true
+        }
+
+        // Remove an address from the whitelist
+        pub fun removeFromWhitelist(account: Address) {
+            self.whitelistedAccounts[account] = false
+        }
+
+        // Check if an address is whitelisted
+        pub fun isWhitelisted(account: Address): Bool {
+            return self.whitelistedAccounts[account] ?? false
+        }
     }
 
-    // Function to burn an NFT
-    function burnNFT(uint256 tokenId) public {
-        require(_isApprovedOrOwner(msg.sender, tokenId), "Caller is not owner nor approved");
-        _burn(tokenId);
+    // Resource that represents an NFT with screenshot and unauthorized capture protection
+    pub resource NFT {
+        pub let id: UInt64
+        pub let metadata: String
+        pub var screenshotProtectionEnabled: Bool
+        pub var infraredProtectionEnabled: Bool
+
+        init(_id: UInt64, _metadata: String) {
+            self.id = _id
+            self.metadata = _metadata
+            self.screenshotProtectionEnabled = true
+            self.infraredProtectionEnabled = true
+        }
+
+        // Notify content creator if a screenshot attempt is made
+        pub fun notifyScreenshotAttempt() {
+            if self.screenshotProtectionEnabled {
+                log("Screenshot attempt detected for NFT ID: ".concat(self.id.toString()))
+            }
+        }
+
+        // Simulate infrared protection mechanism
+        pub fun applyInfraredProtection() {
+            if self.infraredProtectionEnabled {
+                log("Infrared protection activated for NFT ID: ".concat(self.id.toString())
+                    .concat(", content blurred to prevent unauthorized capture."))
+            }
+        }
     }
 
-    // Function to get the royalty info of an NFT
-    function getRoyaltyInfo(uint256 tokenId) public view returns (address, uint256) {
-        RoyaltyInfo memory royalty = royaltyInfo[tokenId];
-        return (royalty.creator, royalty.royaltyPercentage);
+    // Resource interface for Collection
+    pub resource interface CollectionPublic {
+        pub fun deposit(token: @NFT)
+        pub fun withdraw(withdrawID: UInt64): @NFT
+        pub fun getIDs(): [UInt64]
+        pub fun getNFT(id: UInt64): &NFT?
     }
 
-    // Function to get the current token ID
-    function currentTokenId() public view returns (uint256) {
-        return _tokenIds.current();
+    // Resource that represents a Collection of NFTs
+    pub resource Collection: CollectionPublic {
+        pub var ownedNFTs: @{UInt64: NFT}
+
+        init() {
+            self.ownedNFTs <- {}
+        }
+
+        // Deposit an NFT into the collection
+        pub fun deposit(token: @NFT) {
+            let id = token.id
+            self.ownedNFTs[id] <-! token
+        }
+
+        // Withdraw an NFT from the collection by ID
+        pub fun withdraw(withdrawID: UInt64): @NFT {
+            let token <- self.ownedNFTs.remove(key: withdrawID) 
+                ?? panic("NFT does not exist in this collection")
+            return <- token
+        }
+
+        // Get a list of all NFT IDs in the collection
+        pub fun getIDs(): [UInt64] {
+            return self.ownedNFTs.keys
+        }
+
+        // Get a reference to an NFT by ID
+        pub fun getNFT(id: UInt64): &NFT? {
+            return &self.ownedNFTs[id] as &NFT?
+        }
+
+        destroy() {
+            destroy self.ownedNFTs
+        }
+    }
+
+    // Resource that is used to mint NFTs
+    pub resource Minter {
+        pub fun mintNFT(id: UInt64, metadata: String): @NFT {
+            return <- create NFT(_id: id, _metadata: metadata)
+        }
+    }
+
+    // Public function to create an empty collection
+    pub fun createEmptyCollection(): @Collection {
+        return <- create Collection()
+    }
+
+    // Public function to create a Profile resource
+    pub fun createProfile(id: Address): @Profile {
+        return <- create Profile(id: id)
+    }
+
+    // Public function to create an Admin resource
+    pub fun createAdmin(): @Admin {
+        return <- create Admin()
+    }
+
+    // The resource used to mint new NFTs
+    pub let NFTMinter: @Minter
+
+    // The admin resource to manage privacy settings
+    pub let admin: @Admin
+
+    // Initialize the contract
+    init() {
+        self.NFTMinter <- create Minter()
+        self.admin <- create Admin()
+    }
+
+    // Destroy the contract resources
+    destroy() {
+        destroy self.NFTMinter
+        destroy self.admin
     }
 }
