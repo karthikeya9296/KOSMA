@@ -16,6 +16,8 @@ Kosma is a decentralized social media platform that aims to provide a secure, no
 - [Usage](#usage)
 - [Contribution Guidelines](#contribution-guidelines)
 - [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Contact](#contact)
 
 ## Project Overview
 
@@ -24,63 +26,13 @@ Kosma aims to disrupt the current social media landscape by prioritizing user pr
 ## Technologies Used
 
 - **Solidity**: Smart contract development for NFT minting, payments, attestations, etc.
-- **Flow Blockchain**: (#Integration with Flow)(/Users/karthik/KOSMA/README.md
-/Users/karthik/KOSMA/Contracts/KosmaNFT.cdc)
-
-Kosma utilizes Flow blockchain's native smart contract language, Cadence, to manage NFTs representing user-generated content. This integration leverages Flow’s account abstraction and resource-oriented model to ensure scalability and user-friendly experiences. Flow is used to:
-
-Manage user privacy settings.
-
-Enable secure content minting as NFTs.
-
-Prevent unauthorized content capture through layered protections.
-
+- **Flow Blockchain**: Kosma utilizes Flow blockchain's native smart contract language, Cadence, to manage NFTs representing user-generated content. Flow is used to manage user privacy settings, enable secure content minting, and prevent unauthorized content capture.
 - **LayerZero V2**: Cross-chain messaging and NFT interactions.
-- **Story Protocol**: Content licensing, royalty, and dispute management.(add hyperlink for /Users/karthik/KOSMA/backend/services/storyService.js )
-Integration with Story Protocol
-
-KOSMA leverages Story Protocol's powerful blockchain tools to provide a comprehensive solution for creative content management. The integration is as follows:
-
-Licensing: Using the Story Protocol SDK, KOSMA allows content creators to issue licenses to others for using their IP, ensuring transparent and programmable licensing agreements.
-
-Royalties: With Story Protocol's royalty management API, royalties are seamlessly distributed to relevant parties whenever the licensed content is used, enhancing the transparency and fairness of royalty payments.
-
-Disputes: The dispute resolution smart contracts provided by Story Protocol are utilized to address any conflicts that arise over creative IP, giving creators and licensees a fair process to resolve disputes.
-
-
-- **Sign Protocol**: Attestations for content ownership, licensing, and user verification.
-KOSMA integrates **Sign Protocol** to create, manage, and verify attestations for IP. By using schemas, attestations, and Sign Protocol's indexing services, we ensure the integrity and security of digital content. Additionally, our platform incorporates encrypted attestations, making it suitable for managing sensitive information. The platform is built to be transparent, secure, and completely on-chain, leveraging Sign Protocol's powerful tools for attestations.
-
-## Features
-- **Attestations**: Users can create, update, revoke, and manage attestations on-chain, ensuring authenticity and transparency.
-- **Encrypted Attestations**: The project supports encrypted attestations, allowing sensitive data to be securely shared on-chain.
-- **Schema Hooks**: The project leverages **Sign Protocol's schema hooks** to extend functionality, such as whitelisting attesters and managing permissions.
-- **Role-Based Access Control**: Built-in role-based access using AccessControl from OpenZeppelin to manage attester and manager permissions.
-## Integration with Sign Protocol
-The platform integrates with the **Sign Protocol SDK** to add attestations and schema hooks as part of the core functionality:
-1. **Attestations**: Attestations are created, updated, and revoked by authorized attesters. The attestation details include content hashes and encrypted data references.
-2. **Schema Hooks**: Schema hooks are triggered during attestation creation or whitelisting to extend the protocol and provide custom logic.
-3. **Encrypted Data**: Encrypted attestation data is stored securely and can be decrypted using key-sharing mechanisms, ensuring only authorized entities can access the information.
-
-## Smart Contract
-The project uses a Solidity smart contract to manage attestations on-chain:
-- **createAttestation()**: Creates a new attestation with a content hash and encrypted data reference.
-- **batchCreateAttestations()**: Creates multiple attestations in a single transaction.
-- **updateAttestation()**: Updates an existing attestation's content.
-- **revokeAttestation()**: Revokes an attestation, effectively deleting it from the blockchain.
-- **shareDecryptionKey()**: Shares an encrypted key to authorized entities for decryption purposes.
-
-## Requirements
-- **Sign Protocol SDK**: Integrated to use attestations, schemas, and indexing.
-- **OpenZeppelin**: Used for **AccessControl** and **ReentrancyGuard** for security features.
-- **Encryption and Decryption**: Implemented using off-chain methods for sharing keys securely.
-
-
-
-
-
+- **Story Protocol**: Content licensing, royalty, and dispute management. Integrates with Story Protocol SDK for issuing licenses, managing royalties, and handling disputes.
+- **Sign Protocol**: Attestations for content ownership, licensing, and user verification. Integrates with the Sign Protocol SDK to create, manage, and verify attestations for IP.
 - **Superfluid**: Streaming payments for subscriptions and royalty payments.
-- **Circle USDC**: Stablecoin payments.
+- **Circle USDC**: Stablecoin payments and cross-chain transfers using Circle's CCTP.
+- **LedgerJS**: Integration for secure wallet connections and user authentication with Ledger hardware wallets.
 - **XMTP**: Secure on-chain messaging for comments and notifications.
 - **Unlock Protocol**: Membership management for premium content.
 - **React.js**: Frontend UI components.
@@ -120,7 +72,7 @@ For detailed system architecture, refer to the documentation available in the `/
 
 ### Pages
 
-- **HomePage.js**: Displays trending content, sports engagement, and recommended creators.
+- **HomePage.js**: Displays trending content, user engagement, and recommended creators.
 - **ProfilePage.js**: Provides an overview of a user's content, NFTs, and memberships.
 - **ContentPage.js**: Shows detailed content view, including licensing options and cross-chain interactions.
 
@@ -133,7 +85,7 @@ For detailed system architecture, refer to the documentation available in the `/
 
 ## Smart Contracts
 
-- **KosmaNFT.sol**: Handles NFT minting, royalty distribution, and licensing management .
+- **KosmaNFT.sol**: Handles NFT minting, royalty distribution, and licensing management.
 - **LayerZeroMessaging.sol**: Facilitates cross-chain messaging using LayerZero V2.
 - **SignAttestations.sol**: Uses Sign Protocol to manage attestations for ownership, licensing, and verification.
 - **StoryIntegration.sol**: Manages content licensing, royalties, and disputes using Story Protocol.
@@ -157,43 +109,81 @@ Use `/scripts/createSubgraph.js` to create a subgraph for indexing data using **
    ```bash
    git clone https://github.com/yourusername/kosma.git
    cd kosma
+   ```
 2. **Install Dependencies:**
-    ```bash
-    npm install
-3. **Environment Configuration: Copy .env.example to .env and fill in the necessary credentials and blockchain keys.**
+   ```bash
+   npm install
+   ```
+3. **Environment Configuration**: Copy `.env.example` to `.env` and fill in the necessary credentials and blockchain keys.
 4. **Start Backend Server:**
-    ```bash
-    npm run start-backend
+   ```bash
+   npm run start-backend
+   ```
 5. **Start Frontend Application:**
-    ```bash
-    npm run start-frontend
-6. **Deploy Smart Contracts: Follow the steps in /docs/deploymentGuide.md to deploy contracts.**
+   ```bash
+   npm run start-frontend
+   ```
+6. **Deploy Smart Contracts:** Follow the steps in `/docs/deploymentGuide.md` to deploy contracts.
 
 ## Usage
-1. Connect Wallet: Connect your Ledger wallet using the Navbar.
-2. Mint NFTs: Use the profile page to create NFTs for your content.
-3. License Content: View and set licensing terms on the content page.
-Join Memberships: Purchase memberships using Unlock Protocol to access exclusive content.
+1. **Connect Wallet**: Connect your Ledger wallet using the Navbar.
+2. **Mint NFTs**: Use the profile page to create NFTs for your content.
+3. **License Content**: View and set licensing terms on the content page.
+4. **Join Memberships**: Purchase memberships using Unlock Protocol to access exclusive content.
 
 ## Contribution Guidelines
 We welcome contributions to Kosma! Please follow these steps:
 
-Fork the Repository: Fork and clone the repository to your local machine.
-Create a Feature Branch: Create a branch for your feature or bug fix.
-Commit Your Changes: Make sure to add detailed commit messages.
-Push to Your Branch: Push your branch to your fork.
-Open a Pull Request: Open a pull request against the main repository.
-For detailed contribution guidelines, see /docs/developmentGuidelines.md.
+1. **Fork the Repository**: Fork and clone the repository to your local machine.
+2. **Create a Feature Branch**: Create a branch for your feature or bug fix.
+3. **Commit Your Changes**: Make sure to add detailed commit messages.
+4. **Push to Your Branch**: Push your branch to your fork.
+5. **Open a Pull Request**: Open a pull request against the main repository.
+
+For detailed contribution guidelines, see `/docs/developmentGuidelines.md`.
 
 ## License
 
 Kosma is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
 
-### Acknowledgments
+## Acknowledgments
 
 - We would like to thank the developers and contributors of the libraries and protocols used in this project.
 - Special thanks to the open-source community for their continuous support and contributions.
 
-### Contact
+## Contact
 
 For any inquiries or feedback, please reach out to us at [contact@kosma.com](mailto:contact@kosma.com).
+
+---
+
+### Additional ReadMe Files for Integrated Tools
+
+#### 1. Circle USDC Integration
+
+Kosma leverages **Circle's USDC** for secure, fast, and decentralized payments. USDC is used for tipping creators, purchasing content, and streaming payments. Additionally, Circle's Cross-Chain Transfer Protocol (CCTP) enables seamless cross-chain payments, enhancing liquidity and usability.
+
+- **Dependencies**: Install Circle SDK using `npm install @circle/api-sdk`.
+- **Usage**: Payments are initiated through Circle's APIs, allowing stable, real-time financial interactions without traditional banking limitations.
+
+#### 2. Ledger Integration
+
+Kosma integrates **Ledger** for secure wallet connections. Users can connect their Ledger hardware wallet to the Kosma platform to authenticate, sign transactions, and manage assets.
+
+- **Dependencies**: Install LedgerJS using `npm install @ledgerhq/hw-app-eth @ledgerhq/hw-transport-webusb`.
+- **Usage**: LedgerConnect.js facilitates user authentication and transaction signing, ensuring the highest level of security.
+
+#### 3. Story Protocol Integration
+
+Kosma uses **Story Protocol** for licensing content, managing royalties, and resolving disputes.
+
+- **Dependencies**: Install Story Protocol SDK using `npm install @story-protocol/sdk`.
+- **Usage**: Content creators can license their content on-chain, ensuring transparency and fair revenue distribution.
+
+#### 4. Sign Protocol Integration
+
+Kosma utilizes **Sign Protocol** for attestation creation, schema management, and user verification.
+
+- **Dependencies**: Install Sign Protocol SDK using `npm install @sign-protocol/sdk`.
+- **Usage**: Attestations are created to verify ownership and license content, leveraging schema hooks for advanced logic.
+
