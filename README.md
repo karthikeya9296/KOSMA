@@ -204,6 +204,7 @@ KOSMA team Social Handles.
 - [ContentPage.js](frontend/src/pages/ContentPage.js) - Allows cross-chain content interactions using LayerZero.
 - [ProfilePage.js](frontend/src/pages/ProfilePage.js) - Integrates with LayerZero for cross-chain NFT transfers.
 - [Demo](https://drive.google.com/file/d/1c4LKV0fKxETour6R0XrHC5gVxEz21E1S/view?usp=sharing)
+- ![Image 1](https://github.com/karthikeya9296/KOSMA/blob/a7d85ae8b10a2e291b00e14c170ad746bf391ceb/Content/Layerzero.png)
 
 #### Sign Protocol 
 - (Best Overall Application & Encrypted Attestations)
