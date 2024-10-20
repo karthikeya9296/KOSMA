@@ -160,16 +160,16 @@ For any inquiries or feedback, please reach out to us at [contact@kosma.com](mai
 ### Additional ReadMe Files for Integrated Tools
 
 #### Flow Blockchain 
-(Most Killer App Potential & Best Sports App)
-Contracts:
-FlowNFT.sol  - Manages NFTs on Flow, using Cadence smart contracts.
-Backend:
-nftService.js - Manages Flow NFTs.
-Frontend:
-Components/Pages:
-ContentPage.js - Uses Flow to mint NFTs and interact with Flow content.
-HomePage.js - Displays sports-related content using Flow Blockchain.
-ProfilePage.js - Displays user-owned NFTs on Flow.
+-(Most Killer App Potential & Best Sports App)
+-Contracts:
+-FlowNFT.sol  - Manages NFTs on Flow, using Cadence smart contracts.
+-Backend:
+-nftService.js - Manages Flow NFTs.
+-Frontend:
+-Components/Pages:
+-ContentPage.js - Uses Flow to mint NFTs and interact with Flow content.
+-HomePage.js - Displays sports-related content using Flow Blockchain.
+-ProfilePage.js - Displays user-owned NFTs on Flow.
 
 #### LayerZero 
 (Most Innovative Omnichain Solution)
